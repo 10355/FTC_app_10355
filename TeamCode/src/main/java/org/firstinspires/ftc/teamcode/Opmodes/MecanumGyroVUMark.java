@@ -136,6 +136,8 @@ public class MecanumGyroVUMark extends LinearOpMode {
     private double motorCorrectCoefficient = .05;
     public double myCurrentMotorPosition;
     private boolean tel = false;
+    private String vuMarkValue = "UNK";
+    private double timeout = 0;
 
     public void runOpMode() {
         /**
@@ -261,52 +263,34 @@ public class MecanumGyroVUMark extends LinearOpMode {
                     break;
 
                 case VUMark:
-                    while (opModeIsActive()) {
+                    RelicRecoveryVuMark vuMark = RelicRecoveryVuMark.from(relicTemplate);
 
+                    if (vuMark == RelicRecoveryVuMark.UNKNOWN) {
+                        vuMarkValue = String.valueOf(vuMark);
+                        telemetry.addData("vuMarkValue ", vuMarkValue);
                         /**
                          * See if any of the instances of {@link relicTemplate} are currently visible.
                          * {@link RelicRecoveryVuMark} is an enum which can have the following values:
                          * UNKNOWN, LEFT, CENTER, and RIGHT. When a VuMark is visible, something other than
                          * UNKNOWN will be returned by {@link RelicRecoveryVuMark#from(VuforiaTrackable)}.
                          */
-                        RelicRecoveryVuMark vuMark = RelicRecoveryVuMark.from(relicTemplate);
-                        if (vuMark != RelicRecoveryVuMark.UNKNOWN) {
-
-                            /* Found an instance of the template. In the actual game, you will probably
-                             * loop until this condition occurs, then move on to act accordingly depending
-                             * on which VuMark was visible. */
-                            telemetry.addData("VuMark", "%s visible", vuMark);
-
-                            /* For fun, we also exhibit the navigational pose. In the Relic Recovery game,
-                             * it is perhaps unlikely that you will actually need to act on this pose information, but
-                             * we illustrate it nevertheless, for completeness. */
-                            OpenGLMatrix pose = ((VuforiaTrackableDefaultListener)relicTemplate.getListener()).getPose();
-                            telemetry.addData("Pose", format(pose));
-
-                            /* We further illustrate how to decompose the pose into useful rotational and
-                             * translational components */
-                            if (pose != null) {
-                                VectorF trans = pose.getTranslation();
-                                Orientation rot = Orientation.getOrientation(pose, AxesReference.EXTRINSIC, AxesOrder.XYZ, AngleUnit.DEGREES);
-
-                                // Extract the X, Y, and Z components of the offset of the target relative to the robot
-                                double tX = trans.get(0);
-                                double tY = trans.get(1);
-                                double tZ = trans.get(2);
-
-                                // Extract the rotational components of the target relative to the robot
-                                double rX = rot.firstAngle;
-                                double rY = rot.secondAngle;
-                                double rZ = rot.thirdAngle;
-                            }
-                        }
-                        else {
-                            telemetry.addData("VuMark", "not visible");
-                        }
+                        //RelicRecoveryVuMark vuMark = RelicRecoveryVuMark.from(relicTemplate);
+                        telemetry.addData("VuMark", "%s visible", vuMark);
 
                         telemetry.update();
+                    } else {
+                        vuMarkValue = String.valueOf(vuMark);
+                        telemetry.addData("VuMark", "%s visible", vuMark);
+                        telemetry.addData("vuMarkValue ", vuMarkValue);
+                        telemetry.update();
+
+                        state = State.DISPLAY;
                     }
 
+                    break;
+                case DISPLAY:
+                    telemetry.addData("vuMarkValue", String.valueOf(vuMarkValue));
+                    telemetry.update();
                     break;
                 case HALT:
                     robot.motorLF.setPower(0);
@@ -399,7 +383,7 @@ public class MecanumGyroVUMark extends LinearOpMode {
      * Enumerate the States of the machine.
      */
     enum State {
-        HALT, DRIVE, TAIL, COLOR_SENSOR, RANGE, VUMark
+        HALT, DRIVE, TAIL, COLOR_SENSOR, RANGE, VUMark, DISPLAY
     }
 
 }
