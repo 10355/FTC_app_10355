@@ -53,12 +53,9 @@ public class DriveMecanum {
     Orientation angles;
     Acceleration gravity;
 
-    public DriveMecanum(HardwareTestPlatform myRobot, LinearOpMode myOpMode, VuforiaLib thisVuforia,
-                        List<VuforiaTrackable> trackableList, DataLogger myDl) {
+    public DriveMecanum(HardwareTestPlatform myRobot, LinearOpMode myOpMode, DataLogger myDl) {
         robot = myRobot;
         opMode = myOpMode;
-        myVuforia = thisVuforia;
-        myTrackables = trackableList;
         Dl = myDl;
 
     }
@@ -134,199 +131,6 @@ public class DriveMecanum {
                 telemetry();
                 logData();
             }
-            opMode.idle();
-        }
-        motorsHalt();
-    }
-
-    /**
-     * In our testing, on our field, a .7 value indicates you are centered on
-     * the line.  You should use the practice field and test opMode to confirm
-     * this is valid for your actual competition field.
-     * The value from the ODS sensor indicates you are no longer centered on the
-     * line and the robotBearing indicates the bot is to the left of the line
-     * so we will increase power on the LR and decrease power on the RR to
-     * get centered back on the line
-     */
-    public void followLineX(double x, double power, double heading) {
-        procedure = "followLineX";
-        ods = robot.ods.getLightDetected();
-        radians = getRadians(heading);
-
-        while (robotX > x && opMode.opModeIsActive()) {
-            ods = robot.ods.getLightDetected();
-
-            getVuforiaLocation();
-
-            LF = calcLF(radians, power);
-            RF = calcRF(radians, power);
-            LR = calcLR(radians, power);
-            RR = calcRR(radians, power);
-
-            if (ods < .5 && robotBearing > 0 && robotBearing < 180) {
-                LF = power + motorCorrectCoefficient;
-                LR = power + motorCorrectCoefficient;
-                RF = power - motorCorrectCoefficient;
-                RR = power - motorCorrectCoefficient;
-
-                opMode.telemetry.addData("DRIFTED LEFT", String.valueOf(robotBearing));
-            }
-
-            /**
-             * The robot has drifted right, correct the course
-             */
-            if (ods < .5 && robotBearing > 180 && robotBearing < 359.9) {
-                LF = power - motorCorrectCoefficient;
-                LR = power - motorCorrectCoefficient;
-                RF = power + motorCorrectCoefficient;
-                RR = power + motorCorrectCoefficient;
-
-                opMode.telemetry.addData("DRIFTED RIGHT", "");
-            }
-
-            setPower(LF, LR, RF, RR);
-
-            if (tel) {
-                telemetry();
-                logData();
-            }
-
-            opMode.idle();
-        }
-        motorsHalt();
-    }
-
-    public void acquireBeaconX(double x, double power, double heading) {
-        procedure = "acquireBeaconX";
-        initZ = robot.mrGyro.getIntegratedZValue();
-        radians = getRadians(heading);
-
-        getVuforiaLocation();
-
-        while (robotX > x
-                && opMode.opModeIsActive()) {
-
-            ods = robot.ods.getLightDetected();
-            currentZint = robot.mrGyro.getIntegratedZValue();
-
-            getVuforiaLocation();
-
-            LF = calcLF(radians, power);
-            RF = calcRF(radians, power);
-            LR = calcLR(radians, power);
-            RR = calcRR(radians, power);
-
-            currentZint = robot.mrGyro.getIntegratedZValue();
-
-            if (ods < .9 && robotBearing > 0 && robotBearing < 180) {
-                LF = power + power * .1;
-                LR = power + power * .1;
-                RF = power + power * .1;
-                RR = power + power * .1;
-
-                opMode.telemetry.addData("DRIFTED LEFT", String.valueOf(robotBearing));
-            }
-
-            /**
-             * The robot has drifted right, correct the course
-             */
-            if (ods < .9 && robotBearing > 180 && robotBearing < 359.9) {
-                LF = power + power * .1;
-                LR = power + power * .1;
-                RF = power + power * .1;
-                RR = power + power * .1;
-
-                opMode.telemetry.addData("DRIFTED RIGHT", "");
-            }
-
-            /**
-             * The robot is centered on the line, drive straight.
-             */
-            if (ods > .9) {
-                LF = power;
-                RF = power;
-                LR = power;
-                RR = power;
-
-                opMode.telemetry.addData("NO DRIFT", "");
-            }
-
-            setPower(LF, LR, RF, RR);
-
-
-            if (tel) {
-                telemetry();
-                logData();
-            }
-
-            opMode.idle();
-        }
-        motorsHalt();
-    }
-
-    public void acquireBeaconY(double y, double power, double heading) {
-        procedure = "acquireBeaconX";
-        initZ = robot.mrGyro.getIntegratedZValue();
-        radians = getRadians(heading);
-
-        getVuforiaLocation();
-
-        while (robotY < y
-                && opMode.opModeIsActive()) {
-
-            ods = robot.ods.getLightDetected();
-            currentZint = robot.mrGyro.getIntegratedZValue();
-
-            getVuforiaLocation();
-
-            LF = calcLF(radians, power);
-            RF = calcRF(radians, power);
-            LR = calcLR(radians, power);
-            RR = calcRR(radians, power);
-
-            currentZint = robot.mrGyro.getIntegratedZValue();
-
-            if (ods < .9 && robotBearing > 0 && robotBearing < 180) {
-                LF = power + power * .1;
-                LR = power + power * .1;
-                RF = power + power * .1;
-                RR = power + power * .1;
-
-                opMode.telemetry.addData("DRIFTED LEFT", String.valueOf(robotBearing));
-            }
-
-            /**
-             * The robot has drifted right, correct the course
-             */
-            if (ods < .9 && robotBearing > 180 && robotBearing < 359.9) {
-                LF = power + power * .1;
-                LR = power + power * .1;
-                RF = power + power * .1;
-                RR = power + power * .1;
-
-                opMode.telemetry.addData("DRIFTED RIGHT", "");
-            }
-
-            /**
-             * The robot is centered on the line, drive straight.
-             */
-            if (ods > .9) {
-                LF = power;
-                RF = power;
-                LR = power;
-                RR = power;
-
-                opMode.telemetry.addData("NO DRIFT", "");
-            }
-
-            setPower(LF, LR, RF, RR);
-
-
-            if (tel) {
-                telemetry();
-                logData();
-            }
-
             opMode.idle();
         }
         motorsHalt();
@@ -416,18 +220,18 @@ public class DriveMecanum {
 
     }
 
+
     /**
      * Translate on a heading for a defined period of time.
      */
-    public void translateTime(double timeOut, double power, double heading) {
+    public void translateRange(double power, double heading, int range) {
         double timeOutTime;
         procedure = "translateTime";
         initZ = robot.mrGyro.getIntegratedZValue();
         radians = getRadians(heading);
 
-        timeOutTime = runtime.time() + timeOut;
-
-        while (opMode.opModeIsActive() && runtime.time() < timeOutTime) {
+        while (opMode.opModeIsActive() &&
+                robot.rangeSensor.rawUltrasonic() > range) {
             LF = calcLF(radians, power);
             RF = calcRF(radians, power);
             LR = calcLR(radians, power);
@@ -458,18 +262,18 @@ public class DriveMecanum {
         motorsHalt();
 
     }
-
     /**
-     * Translate on a heading and stop when we reach the specified X axis value.
+     * Translate on a heading for a defined period of time.
      */
-    private void translateVuforiaNavXNeg(double x, double power, double heading) {
-        procedure = "translateVuforiaNavXNeg";
+    public void translateTime(double timeOut, double power, double heading) {
+        double timeOutTime;
+        procedure = "translateTime";
         initZ = robot.mrGyro.getIntegratedZValue();
         radians = getRadians(heading);
 
-        getVuforiaLocation();
+        timeOutTime = runtime.time() + timeOut;
 
-        while (opMode.opModeIsActive() && robotX > x) {
+        while (opMode.opModeIsActive() && runtime.time() < timeOutTime) {
             LF = calcLF(radians, power);
             RF = calcRF(radians, power);
             LR = calcLR(radians, power);
@@ -487,92 +291,7 @@ public class DriveMecanum {
 
             setPower(LF, LR, RF, RR);
 
-            getVuforiaLocation();
-
-            if (tel) {
-                telemetry();
-                logData();
-            }
-
-            opMode.idle();
-        }
-
-        motorsHalt();
-
-    }
-
-
-    /**
-     * Translate on a heading and stop when we reach the specified X axis value.
-     */
-    private void translateVuforiaNavXPos(double x, double power, double heading) {
-        procedure = "translateVuforiaNavXNeg";
-        initZ = robot.mrGyro.getIntegratedZValue();
-        radians = getRadians(heading);
-
-        getVuforiaLocation();
-
-        while (opMode.opModeIsActive() && robotX < x) {
-            LF = calcLF(radians, power);
-            RF = calcRF(radians, power);
-            LR = calcLR(radians, power);
-            RR = calcRR(radians, power);
-
-            currentZint = robot.mrGyro.getIntegratedZValue();
-
-            if (currentZint != initZ) {  //Robot has drifted off course
-                zCorrection = Math.abs(initZ - currentZint);
-
-                courseCorrect();
-            } else {
-                zCorrection = 0;
-            }
-
-            setPower(LF, LR, RF, RR);
-
-            getVuforiaLocation();
-
-            if (tel) {
-                telemetry();
-                logData();
-            }
-
-            opMode.idle();
-        }
-
-        motorsHalt();
-
-    }
-
-    /**
-     * Translate on a heading and stop when we reach the specified Y axis value.
-     */
-    private void translateVuforiaNavY(double y, double power, double heading) {
-        procedure = "translateVuforiaNavY";
-        initZ = robot.mrGyro.getIntegratedZValue();
-        radians = getRadians(heading);
-
-        getVuforiaLocation();
-
-        while (opMode.opModeIsActive() && robotY < y) {
-            LF = calcLF(radians, power);
-            RF = calcRF(radians, power);
-            LR = calcLR(radians, power);
-            RR = calcRR(radians, power);
-
-            currentZint = robot.mrGyro.getIntegratedZValue();
-
-            if (currentZint != initZ) {  //Robot has drifted off course
-                zCorrection = Math.abs(initZ - currentZint);
-
-                courseCorrect();
-            } else {
-                zCorrection = 0;
-            }
-
-            setPower(LF, LR, RF, RR);
-
-            getVuforiaLocation();
+            myCurrentMotorPosition = robot.motorLF.getCurrentPosition();
 
             if (tel) {
                 telemetry();
@@ -648,14 +367,6 @@ public class DriveMecanum {
             RF = RF + motorCorrectCoefficient;
             RR = RR + motorCorrectCoefficient;
         }
-    }
-
-    private void getVuforiaLocation() {
-        vuforiaTracking = myVuforia.getLocation(myTrackables);
-        robotX = vuforiaTracking.get(0);
-        robotY = vuforiaTracking.get(1);
-        robotBearing = vuforiaTracking.get(2);
-
     }
 
     public double getRadians(double heading) {

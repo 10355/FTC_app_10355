@@ -88,6 +88,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.Velocity;
 import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackable;
 import org.firstinspires.ftc.teamcode.HardwareProfiles.HardwareTestPlatform;
 import org.firstinspires.ftc.teamcode.Libs.DataLogger;
+import org.firstinspires.ftc.teamcode.Libs.DriveMecanum;
 import org.firstinspires.ftc.teamcode.Libs.Shooter;
 import org.firstinspires.ftc.teamcode.Libs.VuforiaLib;
 import java.util.List;
@@ -131,35 +132,12 @@ public class MecanumGyro extends LinearOpMode {
     public double myCurrentMotorPosition;
     private boolean tel = false;
 
-    // The IMU sensor object
-    BNO055IMU imu;
-
-    // State used for updating telemetry
-    Orientation angles;
-
     public void runOpMode() {
         /**
          * Setup the init state of the robot.  This configures all the hardware that is defined in
          * the HardwareTestPlatform class.
          */
         robot.init(hardwareMap);
-
-        // Set up the parameters with which we will use our IMU. Note that integration
-        // algorithm here just reports accelerations to the logcat log; it doesn't actually
-        // provide positional information.
-        BNO055IMU.Parameters parameters = new BNO055IMU.Parameters();
-        parameters.angleUnit           = BNO055IMU.AngleUnit.DEGREES;
-        parameters.accelUnit           = BNO055IMU.AccelUnit.METERS_PERSEC_PERSEC;
-        parameters.calibrationDataFile = "BNO055IMUCalibration.json"; // see the calibration sample opmode
-        parameters.loggingEnabled      = true;
-        parameters.loggingTag          = "IMU";
-        parameters.accelerationIntegrationAlgorithm = new JustLoggingAccelerationIntegrator();
-
-        // Retrieve and initialize the IMU. We expect the IMU to be attached to an I2C port
-        // on a Core Device Interface Module, configured to be a sensor of type "AdaFruit IMU",
-        // and named "imu".
-        imu = hardwareMap.get(BNO055IMU.class, "imu");
-        imu.initialize(parameters);
 
         /**
          *  Create the DataLogger object.
@@ -174,6 +152,12 @@ public class MecanumGyro extends LinearOpMode {
             telemetry.addData("Waiting on Gyro Calibration", "");
             telemetry.update();
         }
+
+        /**
+         * Instantiate the drive class
+         */
+
+        DriveMecanum drive = new DriveMecanum(robot, opMode, Dl);
 
         telemetry.addData("Status", "Initialized");
         telemetry.update();
@@ -207,31 +191,15 @@ public class MecanumGyro extends LinearOpMode {
              */
 
             switch (state) {
-                case TRANSLATE:
-                    translateTimeMR(20, .5, 0);
-                    state = State.HALT;
-                    break;
-                case MECANUM:
-                    correctMecDrive(4, .75, 90);
-                    state = State.HALT;
-                    break;
-                case AUTONOMUS_BLUE_FRONT:
-                    if (alliance == "blue") {
-                        colorLeftBlue = robot.colorSensorLeft.blue();
-                        colorLeftRed = robot.colorSensorLeft.red();
+                case DRIVE:
+                    drive.translateTime(3, .5, 90);
 
-                        if (colorLeftBlue > colorLeftRed) {  //Color Sensor sees the red ball
-                            correctMecDrive(1, 0.25, 0);  //Drive backward and knock off the ball
-                        }
-                        else {
-                            correctMecDrive(1, 0.25, 180);  //Drive forward and knock off the ball
-                        }
-                        robot.servoLeft.setPosition(.5);
-                        correctMecDrive(4, .75, 90);
-                    }
+                    drive.translateRange(.5, 0, 25);
 
                     state = State.HALT;
+
                     break;
+
                 case RANGE:
                     while (opModeIsActive()) {
                         telemetry.addData("raw ultrasonic", robot.rangeSensor.rawUltrasonic());
@@ -253,6 +221,7 @@ public class MecanumGyro extends LinearOpMode {
                     //telemetry.update();
 
                     break;
+
                 case TAIL:
                     robot.servoRight.setPosition(1);
                     robot.servoLeft.setPosition(0);
@@ -263,46 +232,7 @@ public class MecanumGyro extends LinearOpMode {
                     sleep(2000);
                     //robot.servoElbow.setPosition(1);
                     break;
-                case DRIVE:
-                    double runTime = 5;
-                    double targetTime;
-                    targetTime = opMode.getRuntime() + runTime;
 
-                    while (targetTime > opMode.getRuntime()) {
-                        double headingAngle;
-                        angles = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
-                        headingAngle = Double.parseDouble(formatAngle(angles.angleUnit, angles.firstAngle));
-
-                        telemetry.addData("heading", String.valueOf(headingAngle));
-                        telemetry.addData("TargetTime", String.valueOf(targetTime));
-                        telemetry.addData("RunTime", String.valueOf(opMode.getRuntime()));
-                        telemetry.update();
-
-                        translateTimeMR(3.6, 0.5, 0);
-
-                        pivotLeft(0.25, 85);
-
-                        translateRange(.5, 0, 25);
-
-                        translateRange(.5, -90, 15);
-
-                        wait(1);
-
-                        translateTimeMR(0.5, 0.5, 90);
-
-                        wait(1);
-
-                        translateRange(.5, -90, 15);
-
-
-
-                        motorsHalt();
-
-                        opMode.idle();
-                    }
-                    state = State.HALT;
-
-                    break;
                 case HALT:
                     robot.motorLF.setPower(0);
                     robot.motorLR.setPower(0);
@@ -318,333 +248,11 @@ public class MecanumGyro extends LinearOpMode {
         }
     }
 
-    public void wait(int time) {
-        double then = 0;
-
-        then = opMode.getRuntime() + time;
-
-        while (opMode.getRuntime() < then) {
-
-        }
-    }
-
     /**
      * Pivot the robot to a new heading. 0 is straight ahead, 1 to 179 is to the left -1 to -179 is
      * to the right.
      */
-    public void pivotLeft(double power, double heading) {
 
-        angles   = robot.imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
-        initZ = Double.parseDouble(formatAngle(angles.angleUnit, angles.firstAngle));
-        //initZ = robot.mrGyro.getIntegratedZValue();
-        currentZint = initZ;
-
-        while (currentZint < heading && opMode.opModeIsActive()) {
-            /**
-             * We are pivoting left so reverse power to the left motor
-             */
-            LR = -power;
-            LF = -power;
-            RR = power;
-            RF = power;
-
-            setPower(LF, LR, RF, RR);
-
-            currentZint = robot.mrGyro.getIntegratedZValue();
-
-            if (tel) {
-                telemetry();
-                logData();
-            }
-            opMode.idle();
-        }
-        motorsHalt();
-    }
-
-
-    /**
-     * Translate on a heading for a defined period of time.
-     */
-    public void translateTimeMR(double timeOut, double power, double heading) {
-        double timeOutTime;
-        initZ = robot.mrGyro.getIntegratedZValue();
-        currentZint = robot.mrGyro.getIntegratedZValue();
-        radians = getRadians(heading);
-
-        timeOutTime = runtime.time() + timeOut;
-
-        while (opMode.opModeIsActive() && runtime.time() < timeOutTime) {
-            LF = calcLF(radians, power);
-            RF = calcRF(radians, power);
-            LR = calcLR(radians, power);
-            RR = calcRR(radians, power);
-
-            currentZint = robot.mrGyro.getIntegratedZValue();
-
-            z = Math.round(currentZint);
-            telemetry.addData("Z", String.valueOf(z));
-
-            telemetry();
-
-            if (currentZint != initZ) {  //Robot has drifted off course
-                zCorrection = Math.abs(initZ - currentZint);
-
-                courseCorrect();
-            } else {
-                zCorrection = 0;
-            }
-
-            setPower(LF, LR, RF, RR);
-
-            myCurrentMotorPosition = robot.motorLF.getCurrentPosition();
-
-            if (tel) {
-                telemetry();
-                logData();
-            }
-
-            opMode.idle();
-        }
-
-        motorsHalt();
-
-    }
-
-    public void translateMR(double power, double heading) {
-
-        initZ = robot.mrGyro.getIntegratedZValue();
-        currentZint = robot.mrGyro.getIntegratedZValue();
-        radians = getRadians(heading);
-
-
-
-        LF = calcLF(radians, power);
-        RF = calcRF(radians, power);
-        LR = calcLR(radians, power);
-        RR = calcRR(radians, power);
-
-        currentZint = robot.mrGyro.getIntegratedZValue();
-
-        z = Math.round(currentZint);
-        telemetry.addData("Z", String.valueOf(z));
-
-        telemetry();
-
-        if (currentZint != initZ) {  //Robot has drifted off course
-            zCorrection = Math.abs(initZ - currentZint);
-
-            courseCorrect();
-        } else {
-            zCorrection = 0;
-        }
-
-        setPower(LF, LR, RF, RR);
-
-        myCurrentMotorPosition = robot.motorLF.getCurrentPosition();
-
-        if (tel) {
-            telemetry();
-            logData();
-        }
-
-        opMode.idle();
-
-
-    }
-
-    /**
-     * Translate on a heading for a defined period of time.
-     */
-    public void translateTime(double timeOut, double power, double heading) {
-        double timeOutTime;
-        angles = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
-        initZ = Double.parseDouble(formatAngle(angles.angleUnit, angles.firstAngle));
-        radians = getRadians(heading);
-
-        timeOutTime = runtime.time() + timeOut;
-
-        while (opMode.opModeIsActive() && runtime.time() < timeOutTime) {
-            LF = calcLF(radians, power);
-            RF = calcRF(radians, power);
-            LR = calcLR(radians, power);
-            RR = calcRR(radians, power);
-
-            angles = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
-            currentZint = Double.parseDouble(formatAngle(angles.angleUnit, angles.firstAngle));
-
-            z = Math.round(currentZint);
-            telemetry.addData("Z", String.valueOf(z));
-
-            telemetry();
-
-            if (currentZint != initZ) {  //Robot has drifted off course
-                zCorrection = Math.abs(initZ - currentZint);
-
-                courseCorrect();
-            } else {
-                zCorrection = 0;
-            }
-
-            setPower(LF, LR, RF, RR);
-
-            myCurrentMotorPosition = robot.motorLF.getCurrentPosition();
-
-            if (tel) {
-                telemetry();
-                logData();
-            }
-
-            opMode.idle();
-        }
-
-        motorsHalt();
-
-    }
-
-    /**
-     * Translate on a heading for a defined period of time.
-     */
-    public void translateRange(double power, double heading, int range) {
-        double timeOutTime;
-        angles = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
-        initZ = Double.parseDouble(formatAngle(angles.angleUnit, angles.firstAngle));
-        radians = getRadians(heading);
-
-        while (opMode.opModeIsActive() &&
-                robot.rangeSensor.rawUltrasonic() > range) {
-            LF = calcLF(radians, power);
-            RF = calcRF(radians, power);
-            LR = calcLR(radians, power);
-            RR = calcRR(radians, power);
-
-            angles = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
-            currentZint = Double.parseDouble(formatAngle(angles.angleUnit, angles.firstAngle));
-
-            z = Math.round(currentZint);
-            telemetry.addData("Z", String.valueOf(z));
-
-            telemetry();
-
-            if (currentZint != initZ) {  //Robot has drifted off course
-                zCorrection = Math.abs(initZ - currentZint);
-
-                courseCorrect();
-            } else {
-                zCorrection = 0;
-            }
-
-            setPower(LF, LR, RF, RR);
-
-            myCurrentMotorPosition = robot.motorLF.getCurrentPosition();
-
-            if (tel) {
-                telemetry();
-                logData();
-            }
-
-            opMode.idle();
-        }
-
-        motorsHalt();
-
-    }
-    private void correctDrive(double time, double power) {
-
-        double timeout = getRuntime() + time;
-
-        angles = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
-        double intz = Double.parseDouble(formatAngle(angles.angleUnit, angles.firstAngle));
-
-        while(getRuntime() < timeout) {
-            angles = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
-            headingAngle = Double.parseDouble(formatAngle(angles.angleUnit, angles.firstAngle));
-
-            telemetry.addData("Gyro", String.valueOf(headingAngle));
-            telemetry.update();
-
-            if (headingAngle == intz) {
-                robot.motorLF.setPower(power);
-                robot.motorRR.setPower(power);
-                robot.motorLR.setPower(power);
-                robot.motorRF.setPower(power);
-            }
-
-            if (headingAngle < intz) {      //Robot has turned right
-                robot.motorLF.setPower(power*0.9);
-                robot.motorRR.setPower(power);
-                robot.motorLR.setPower(power*0.9);
-                robot.motorRF.setPower(power);
-            }
-
-            if (headingAngle > intz) {      //Robot has turned left
-                robot.motorLF.setPower(power);
-                robot.motorRR.setPower(power*0.9);
-                robot.motorLR.setPower(power);
-                robot.motorRF.setPower(power*0.9);
-            }
-
-        }
-    }
-
-    private void correctMecDrive(double time, double power, double heading) {
-        double timeout = getRuntime() + time;
-        double radians = getRadians(heading);
-
-
-        angles = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
-        double intz = Double.parseDouble(formatAngle(angles.angleUnit, angles.firstAngle));
-
-        double v1 = power * Math.sin(radians + (Math.PI / 4));
-        double v2 = power * Math.sin(radians + (Math.PI / 4));
-        double v3 = power * Math.cos(radians + (3*(Math.PI / 4)));
-        double v4 = power * Math.cos(radians + (3*(Math.PI / 4)));
-
-        while(getRuntime() < timeout) {
-            angles = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
-            headingAngle = Double.parseDouble(formatAngle(angles.angleUnit, angles.firstAngle));
-
-            telemetry.addData("Gyro", String.valueOf(headingAngle));
-            telemetry.update();
-
-            if (headingAngle == intz) {
-                robot.motorLF.setPower(v1);
-                robot.motorRR.setPower(v2);
-                robot.motorLR.setPower(v3);
-                robot.motorRF.setPower(v4);
-            }
-
-            if (headingAngle < intz) {      //Robot has turned right
-                robot.motorLF.setPower(v1-(0.02*Math.abs(headingAngle)));
-                robot.motorRR.setPower(v2);
-                robot.motorLR.setPower(v3-(0.02*Math.abs(headingAngle)));
-                robot.motorRF.setPower(v4);
-            }
-
-            if (headingAngle > intz) {      //Robot has turned left
-                robot.motorLF.setPower(v1);
-                robot.motorRR.setPower(v2-(0.02*Math.abs(headingAngle)));
-                robot.motorLR.setPower(v3);
-                robot.motorRF.setPower(v4-(0.02*Math.abs(headingAngle)));
-            }
-        }
-    }
-    public void courseCorrect() {
-        if (currentZint > initZ) {  //Robot has drifted left
-            telemetry.addData("Course", "LEFT");
-            LF = LF + (motorCorrectCoefficient);
-            LR = LR + (motorCorrectCoefficient);
-            RF = RF - (motorCorrectCoefficient);
-            RR = RR - (motorCorrectCoefficient);
-        }
-
-        if (currentZint < initZ) {  //Robot has drifted right
-            telemetry.addData("Course", "RIGHT");
-            LF = LF - (motorCorrectCoefficient);
-            LR = LR - (motorCorrectCoefficient);
-            RF = RF + (motorCorrectCoefficient);
-            RR = RR + (motorCorrectCoefficient);
-        }
-    }
 
     public void motorsHalt() {
         robot.motorLF.setPower(0);
