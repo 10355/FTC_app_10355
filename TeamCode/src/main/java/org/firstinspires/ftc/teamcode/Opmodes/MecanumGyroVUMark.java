@@ -1,0 +1,405 @@
+/*
+Copyright (c) 2016 Robert Atkinson
+
+All rights reserved.
+
+Redistribution and use in source and binary forms, with or without modification,
+are permitted (subject to the limitations in the disclaimer below) provided that
+the following conditions are met:
+
+Redistributions of source code must retain the above copyright notice, this list
+of conditions and the following disclaimer.
+
+Redistributions in binary form must reproduce the above copyright notice, this
+list of conditions and the following disclaimer in the documentation and/or
+other materials provided with the distribution.
+
+Neither the name of Robert Atkinson nor the names of his contributors may be used to
+endorse or promote products derived from this software without specific prior
+written permission.
+
+NO EXPRESS OR IMPLIED LICENSES TO ANY PARTY'S PATENT RIGHTS ARE GRANTED BY THIS
+LICENSE. THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO,
+THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESSFOR A PARTICULAR PURPOSE
+ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE
+FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR
+TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
+THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+*/
+
+/*
+    Team:       10355 - Project Peacock
+    Autonomous Program - Red Strategy #1
+    Alliance Color: Red
+    Robot Starting Position: Red zone, wall near ramp
+    Strategy Description:
+        - Press correct button on beacon near ramp
+        - Press correct button on beacon furthest from ramp
+        - Park a wheel on the red ramp
+
+    Hardware Setup:
+        - 4 mecanum wheels with encoder on LF wheel - encoder utilized for measuring distance for fwd/rev drive operation
+        - Arm Motor with encoder - controls mechanism for dumping particles into ramp
+        - Gyro sensor located at the center of the robot - utilized to compensate for drift
+        - 1 x Color sensor (colorSensorLeft)- utilized to identify beacon color
+        - 1 x Touch sensor - utilized to identify when robot touches wall with the front of the robot
+        - 1 x Optical Distance Sensor (ODS) - utilized to locate the white lines on the floor
+        - 1 x Motorola Camera - Utilized for Vuforia positioning of the robot on the field
+
+    State Order:
+        - ACQUIRE_BLUE_BEACON_RIGHT       // moves from the wall to the first beacon closest to the ramp
+        - PUSH_BUTTON_RED               // Identifies which button to press, right or left
+        - PRESS_BUTTON                  // presses the correct button - also validates that the button is pressed
+                                        // and attempts to press over again until the button is pressed
+        - ACQUIRE_BLUE_BEACON_LEFT      // moves from the wall to the second beacon on the right of the field
+        - PUSH_BUTTON_RED               // Identifies which button to press, right or left
+        - PRESS_BUTTON                  // presses the correct button - also validates that the button is pressed
+                                        // and attempts to press over again until the button is pressed
+        - END_GAME                      // identifies the last actions before the end of autonomous mode
+        - RAMP                          // For this strategy, the robot will end with a wheel parked on the ramp
+        - HALT                          // Shutdown sequence for autonomous mode
+
+ */
+package org.firstinspires.ftc.teamcode.Opmodes;
+
+/**
+ * Import the classes we need to have local access to.
+ */
+
+import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+import com.qualcomm.robotcore.util.ElapsedTime;
+
+import org.firstinspires.ftc.robotcore.external.ClassFactory;
+import org.firstinspires.ftc.robotcore.external.matrices.OpenGLMatrix;
+import org.firstinspires.ftc.robotcore.external.matrices.VectorF;
+import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
+import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
+import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
+import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
+import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
+import org.firstinspires.ftc.robotcore.external.navigation.RelicRecoveryVuMark;
+import org.firstinspires.ftc.robotcore.external.navigation.VuMarkInstanceId;
+import org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocalizer;
+import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackable;
+import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackableDefaultListener;
+import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackables;
+import org.firstinspires.ftc.teamcode.HardwareProfiles.HardwareTestPlatform;
+import org.firstinspires.ftc.teamcode.Libs.DataLogger;
+import org.firstinspires.ftc.teamcode.Libs.DriveMecanum;
+import org.firstinspires.ftc.teamcode.Libs.VuforiaLib;
+
+/**
+ * Name the opMode and put it in the appropriate group
+ */
+@Autonomous(name = "Mecanum Gyro VuMark", group = "COMP")
+
+public class MecanumGyroVUMark extends LinearOpMode {
+
+    /**
+     * Instantiate all objects needed in this class
+     */
+
+    private final static HardwareTestPlatform robot = new HardwareTestPlatform();
+    private ElapsedTime runtime = new ElapsedTime();
+    private LinearOpMode opMode = this;
+    private DataLogger Dl;                          //Datalogger object
+    private String alliance = "blue";                //Your current alliance
+    private State state = State.VUMark;    //Machine State
+    OpenGLMatrix lastLocation = null;
+
+    /**
+     * {@link #vuforia} is the variable we will use to store our instance of the Vuforia
+     * localization engine.
+     */
+    VuforiaLocalizer vuforia;
+    /**
+     * Define global variables
+     */
+
+    private double colorRight = 0;
+    private double colorLeft = 0;
+    private double colorLeftBlue = 0;
+    private double colorLeftRed = 0;
+    private double headingAngle = 0;
+    double radians = 0;
+    public double LF, RF, LR, RR;
+    public double currentZint = 0;
+    private long z = 0;
+    public double zCorrection = 0;
+    public double initZ = 0;
+    private double changeSpeed = 0;
+    private double motorCorrectCoefficient = .05;
+    public double myCurrentMotorPosition;
+    private boolean tel = false;
+
+    public void runOpMode() {
+        /**
+         * Setup the init state of the robot.  This configures all the hardware that is defined in
+         * the HardwareTestPlatform class.
+         */
+        robot.init(hardwareMap);
+
+        /**
+         * Setup Vuforia
+         */
+
+        int cameraMonitorViewId = hardwareMap.appContext.getResources().getIdentifier("cameraMonitorViewId", "id", hardwareMap.appContext.getPackageName());
+        VuforiaLocalizer.Parameters parameters = new VuforiaLocalizer.Parameters(cameraMonitorViewId);
+        parameters.vuforiaLicenseKey = "AWLOnnD/////AAAAGUkCQDlQKUEVie7jg6bzwOsIdO360LbYDcYryrOUvM7ISMTrmHv4Z3WRq5IydTQEhQYFOCQhOD6wsaCEHdx3+K/HibQdTtWHzc5xTm//yzcfMcYBwNQsUFGghDV4ccGnbSXHALbYnv63U/n7VeCY91NtLLBe4rB3/U0q22IO6o3Q7Pui+06i3VlTiomIqptoGpbI0kuEwok+6Mq6818ECggYxwpW4UATAy7Rl0eDzp8BzkYEWM8Qe3ykRiEk9D4DBApyx8p3AERmPlQU8rIA/JDAs4tCEJSMNycVw2RKdE1qTrNfVqPe+mYWNOpypVq67odTh7tTHE+BGqdh6znE4NlTia2vr6vmAHjDsQuxn5bm";
+        parameters.cameraDirection = VuforiaLocalizer.CameraDirection.BACK;
+        this.vuforia = ClassFactory.createVuforiaLocalizer(parameters);
+        /**
+         * Load the data set containing the VuMarks for Relic Recovery. There's only one trackable
+         * in this data set: all three of the VuMarks in the game were created from this one template,
+         * but differ in their instance id information.
+         * @see VuMarkInstanceId
+         */
+        VuforiaTrackables relicTrackables = this.vuforia.loadTrackablesFromAsset("RelicVuMark");
+        VuforiaTrackable relicTemplate = relicTrackables.get(0);
+        relicTemplate.setName("relicVuMarkTemplate"); // can help in debugging; otherwise not necessary
+
+
+        /**
+         *  Create the DataLogger object.
+         */
+        createDl();
+
+        /**
+         * Calibrate the MR Gyro
+         */
+        robot.sensorGyro.calibrate();
+        while (robot.sensorGyro.isCalibrating()) {
+            telemetry.addData("Waiting on Gyro Calibration", "");
+            telemetry.update();
+        }
+
+        /**
+         * Instantiate the drive class
+         */
+
+        DriveMecanum drive = new DriveMecanum(robot, opMode, Dl);
+
+        telemetry.addData("Status", "Initialized");
+        telemetry.update();
+        sleep(1000);
+
+        telemetry.addData(">", "Press Play to start tracking");
+        telemetry.update();
+
+        /**
+         * Deploy the color sensor
+         */
+
+        robot.servoLeft.setPosition(.5);
+        robot.servoRight.setPosition(1);
+        sleep(2000);
+
+        /**
+         * Start the opMode
+         */
+        waitForStart();
+
+        relicTrackables.activate();
+
+        //imu.startAccelerationIntegration(new Position(), new Velocity(), 1000);
+        // Start the logging of measured acceleration
+
+
+        while (opModeIsActive()) {
+            /**
+             * !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+             * This is the section of code you should change for your robot.
+             * !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+             */
+
+            switch (state) {
+                case DRIVE:
+                    drive.translateTime(3, .5, 90);
+
+                    drive.translateRange(.5, 0, 25);
+
+                    state = State.HALT;
+
+                    break;
+
+                case RANGE:
+                    while (opModeIsActive()) {
+                        telemetry.addData("raw ultrasonic", robot.rangeSensor.rawUltrasonic());
+                        telemetry.addData("raw optical", robot.rangeSensor.rawOptical());
+                        telemetry.addData("cm optical", "%.2f cm", robot.rangeSensor.cmOptical());
+                        telemetry.addData("cm", "%.2f cm", robot.rangeSensor.getDistance(DistanceUnit.CM));
+                        telemetry.update();
+                    }
+                    break;
+                case COLOR_SENSOR:
+                    //colorRight = robot.colorSensorRight.argb();
+                    //colorLeft = robot.colorSensorLeft.argb();
+                    //telemetry.addData("Right RGB", String.valueOf(colorRight));
+                    //telemetry.addData("Right Blue", String.valueOf(robot.colorSensorRight.blue()));
+                    //telemetry.addData("Right Red", String.valueOf(robot.colorSensorRight.red()));
+                    //telemetry.addData("Left RGB", String.valueOf(colorLeft));
+                    //telemetry.addData("Left Blue", String.valueOf(robot.colorSensorLeft.blue()));
+                    //telemetry.addData("Left Red", String.valueOf(robot.colorSensorLeft.red()));
+                    //telemetry.update();
+
+                    break;
+
+                case TAIL:
+                    robot.servoRight.setPosition(1);
+                    robot.servoLeft.setPosition(0);
+
+                    sleep(2000);
+                    robot.servoRight.setPosition(.5);
+                    robot.servoLeft.setPosition(.5);
+                    sleep(2000);
+                    //robot.servoElbow.setPosition(1);
+                    break;
+
+                case VUMark:
+                    while (opModeIsActive()) {
+
+                        /**
+                         * See if any of the instances of {@link relicTemplate} are currently visible.
+                         * {@link RelicRecoveryVuMark} is an enum which can have the following values:
+                         * UNKNOWN, LEFT, CENTER, and RIGHT. When a VuMark is visible, something other than
+                         * UNKNOWN will be returned by {@link RelicRecoveryVuMark#from(VuforiaTrackable)}.
+                         */
+                        RelicRecoveryVuMark vuMark = RelicRecoveryVuMark.from(relicTemplate);
+                        if (vuMark != RelicRecoveryVuMark.UNKNOWN) {
+
+                            /* Found an instance of the template. In the actual game, you will probably
+                             * loop until this condition occurs, then move on to act accordingly depending
+                             * on which VuMark was visible. */
+                            telemetry.addData("VuMark", "%s visible", vuMark);
+
+                            /* For fun, we also exhibit the navigational pose. In the Relic Recovery game,
+                             * it is perhaps unlikely that you will actually need to act on this pose information, but
+                             * we illustrate it nevertheless, for completeness. */
+                            OpenGLMatrix pose = ((VuforiaTrackableDefaultListener)relicTemplate.getListener()).getPose();
+                            telemetry.addData("Pose", format(pose));
+
+                            /* We further illustrate how to decompose the pose into useful rotational and
+                             * translational components */
+                            if (pose != null) {
+                                VectorF trans = pose.getTranslation();
+                                Orientation rot = Orientation.getOrientation(pose, AxesReference.EXTRINSIC, AxesOrder.XYZ, AngleUnit.DEGREES);
+
+                                // Extract the X, Y, and Z components of the offset of the target relative to the robot
+                                double tX = trans.get(0);
+                                double tY = trans.get(1);
+                                double tZ = trans.get(2);
+
+                                // Extract the rotational components of the target relative to the robot
+                                double rX = rot.firstAngle;
+                                double rY = rot.secondAngle;
+                                double rZ = rot.thirdAngle;
+                            }
+                        }
+                        else {
+                            telemetry.addData("VuMark", "not visible");
+                        }
+
+                        telemetry.update();
+                    }
+
+                    break;
+                case HALT:
+                    robot.motorLF.setPower(0);
+                    robot.motorLR.setPower(0);
+                    robot.motorRF.setPower(0);
+                    robot.motorRR.setPower(0);
+                    //Stop the DataLogger
+                    dlStop();
+
+                    //Exit the OpMode
+                    requestOpModeStop();
+                    break;
+            }
+        }
+    }
+
+    /**
+     * Format the Vumark String
+     * @param transformationMatrix
+     * @return
+     */
+    String format(OpenGLMatrix transformationMatrix) {
+        return (transformationMatrix != null) ? transformationMatrix.formatAsTransform() : "null";
+    }
+
+    /**
+     * Setup the dataLogger
+     * The dataLogger takes a set of fields defined here and sets up the file on the Android device
+     * to save them to.  We then log data later throughout the class.
+     */
+    private void createDl() {
+
+        Dl = new DataLogger("AutoMecanumSimpleTest" + runtime.time());
+        Dl.addField("runTime");
+        Dl.addField("Alliance");
+        Dl.newLine();
+    }
+
+    /**
+     * Log data to the file on the phone.
+     */
+    private void logData() {
+
+        Dl.addField(String.valueOf(runtime.time()));
+        Dl.addField(String.valueOf(alliance));
+        Dl.newLine();
+    }
+
+    /**
+     * Transmit telemetry.
+     */
+    private void telemetry() {
+
+        opMode.telemetry.addData("Current Z Int", String.valueOf(currentZint));
+        opMode.telemetry.addData("Z Correction", String.valueOf(zCorrection));
+        opMode.telemetry.addData("LF Encoder", String.valueOf(robot.motorLF.getCurrentPosition()));
+        opMode.telemetry.addData("LR Encoder", String.valueOf(robot.motorLR.getCurrentPosition()));
+        opMode.telemetry.addData("RF Encoder", String.valueOf(robot.motorRF.getCurrentPosition()));
+        opMode.telemetry.addData("RR Encoder", String.valueOf(robot.motorRR.getCurrentPosition()));
+        opMode.telemetry.addData("LF", String.valueOf(LF));
+        opMode.telemetry.addData("LR", String.valueOf(LR));
+        opMode.telemetry.addData("RF", String.valueOf(RF));
+        opMode.telemetry.addData("RR", String.valueOf(RR));
+        opMode.telemetry.addData("raw ultrasonic", robot.rangeSensor.rawUltrasonic());
+        opMode.telemetry.addData("raw optical", robot.rangeSensor.rawOptical());
+        opMode.telemetry.addData("cm optical", "%.2f cm", robot.rangeSensor.cmOptical());
+        opMode.telemetry.addData("cm", "%.2f cm", robot.rangeSensor.getDistance(DistanceUnit.CM));
+        //opMode.telemetry.addData("Right RGB", String.valueOf(colorRight));
+        //opMode.telemetry.addData("Right Blue", String.valueOf(robot.colorSensorRight.blue()));
+        //opMode.telemetry.addData("Right Red", String.valueOf(robot.colorSensorRight.red()));
+        //opMode.telemetry.addData("Left RGB", String.valueOf(colorLeft));
+        //opMode.telemetry.addData("Left Blue", String.valueOf(robot.colorSensorLeft.blue()));
+        //opMode.telemetry.addData("Left Red", String.valueOf(robot.colorSensorLeft.red()));
+        opMode.telemetry.addData("LF", String.valueOf(LF));
+        opMode.telemetry.addData("RF", String.valueOf(RF));
+        opMode.telemetry.addData("LR", String.valueOf(LR));
+        opMode.telemetry.addData("RR", String.valueOf(RR));
+        opMode.telemetry.update();
+    }
+
+    /**
+     * Stop the DataLogger
+     */
+    private void dlStop() {
+        Dl.closeDataLogger();
+
+    }
+
+    /**
+     * Enumerate the States of the machine.
+     */
+    enum State {
+        HALT, DRIVE, TAIL, COLOR_SENSOR, RANGE, VUMark
+    }
+
+}
