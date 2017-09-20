@@ -138,6 +138,7 @@ public class MecanumGyroVUMark extends LinearOpMode {
     private boolean tel = false;
     private String vuMarkValue = "UNK";
     private double timeout = 0;
+    private int count = 1;
 
     public void runOpMode() {
         /**
@@ -264,9 +265,17 @@ public class MecanumGyroVUMark extends LinearOpMode {
 
                 case VUMark:
                     RelicRecoveryVuMark vuMark = RelicRecoveryVuMark.from(relicTemplate);
+                    if (count == 1) {
+                        timeout = 10;
+                        timeout = opMode.getRuntime() + timeout;
+                        count = count + 1;
+                    }
 
-                    if (vuMark == RelicRecoveryVuMark.UNKNOWN) {
+                    if (vuMark == RelicRecoveryVuMark.UNKNOWN  &&
+                            opMode.getRuntime() < timeout) {
                         vuMarkValue = String.valueOf(vuMark);
+                        telemetry.addData("timeout", String.valueOf(timeout));
+                        telemetry.addData("now", String.valueOf(opMode.getRuntime()));
                         telemetry.addData("vuMarkValue ", vuMarkValue);
                         /**
                          * See if any of the instances of {@link relicTemplate} are currently visible.
