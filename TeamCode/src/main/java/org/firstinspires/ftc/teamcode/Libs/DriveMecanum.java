@@ -32,15 +32,10 @@ public class DriveMecanum {
     public double odsThreshold = .2;   //Threshold at which the ODS sensor acquires the whie line
     public double ods = 0;             //Value returned from the Optical Distance Sensor
     public double zCorrection = 0;
-    private List<VuforiaTrackable> myTrackables;
     private HardwareTestPlatform robot = null;
     private LinearOpMode opMode = null;
     private ElapsedTime runtime = new ElapsedTime();
-    private VuforiaLib myVuforia = null;
-    private List<Double> vuforiaTracking;
     private DataLogger Dl;
-    private double heading;
-    private double power;
     private double colorRightRed = 0;   //Value from color sensor
     private double colorRightBlue = 0;  //Value from color sensor
     private double colorLeftRed = 0;    //Value from color sensor
@@ -49,9 +44,6 @@ public class DriveMecanum {
     private double changeSpeed = 0;
     private double motorCorrectCoefficient = .05;
     private boolean tel = false;
-    // State used for updating telemetry
-    Orientation angles;
-    Acceleration gravity;
 
     public DriveMecanum(HardwareTestPlatform myRobot, LinearOpMode myOpMode, DataLogger myDl) {
         robot = myRobot;
@@ -83,9 +75,7 @@ public class DriveMecanum {
      */
     public void pivotLeft(double power, double heading) {
         procedure = "Pivot";
-        angles   = robot.imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
-        initZ = Double.parseDouble(formatAngle(angles.angleUnit, angles.firstAngle));
-        //initZ = robot.mrGyro.getIntegratedZValue();
+        initZ = robot.mrGyro.getIntegratedZValue();
         currentZint = initZ;
 
         while (currentZint < heading && opMode.opModeIsActive()) {
@@ -99,8 +89,7 @@ public class DriveMecanum {
 
             setPower(LF, LR, RF, RR);
 
-            angles   = robot.imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
-            currentZint = Double.parseDouble(formatAngle(angles.angleUnit, angles.firstAngle));
+            currentZint = robot.mrGyro.getIntegratedZValue();
             if (tel) {
                 telemetry();
                 logData();
@@ -381,16 +370,14 @@ public class DriveMecanum {
     private void telemetry() {
 
         opMode.telemetry.addData("Procedure", String.valueOf(procedure));
-        opMode.telemetry.addData("Heading", String.valueOf(heading));
-        opMode.telemetry.addData("robotX", String.valueOf((int) robotX));
-        opMode.telemetry.addData("robotY", String.valueOf((int) robotY));
-        opMode.telemetry.addData("robotBearing", String.valueOf((int) robotBearing));
         opMode.telemetry.addData("Current Z Int", String.valueOf(currentZint));
         opMode.telemetry.addData("Z Correction", String.valueOf(zCorrection));
-        opMode.telemetry.addData("touchSensor", String.valueOf(robot.touchSensor.getValue()));
-        opMode.telemetry.addData("ODS", String.valueOf(ods));
+        opMode.telemetry.addData("Range", String.valueOf(robot.rangeSensor.rawUltrasonic()));
         opMode.telemetry.addData("Target Encoder Position", String.valueOf(myTargetPosition));
-        opMode.telemetry.addData("Current Encoder Position", String.valueOf(robot.motorLF.getCurrentPosition()));
+        opMode.telemetry.addData("LF Encoder", String.valueOf(robot.motorLF.getCurrentPosition()));
+        opMode.telemetry.addData("LR Encoder", String.valueOf(robot.motorLR.getCurrentPosition()));
+        opMode.telemetry.addData("RF Encoder", String.valueOf(robot.motorRF.getCurrentPosition()));
+        opMode.telemetry.addData("RR Encoder", String.valueOf(robot.motorRR.getCurrentPosition()));
         opMode.telemetry.addData("LF", String.valueOf(LF));
         opMode.telemetry.addData("RF", String.valueOf(RF));
         opMode.telemetry.addData("LR", String.valueOf(LR));
@@ -408,7 +395,6 @@ public class DriveMecanum {
         Dl.addField(String.valueOf(""));
         Dl.addField(String.valueOf(procedure));
         Dl.addField(String.valueOf(""));
-        Dl.addField(String.valueOf(heading));
         Dl.addField(String.valueOf((int) robotX));
         Dl.addField(String.valueOf((int) robotY));
         Dl.addField(String.valueOf(""));

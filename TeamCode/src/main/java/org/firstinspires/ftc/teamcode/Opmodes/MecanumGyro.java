@@ -296,10 +296,6 @@ public class MecanumGyro extends LinearOpMode {
         //opMode.telemetry.addData("Left RGB", String.valueOf(colorLeft));
         //opMode.telemetry.addData("Left Blue", String.valueOf(robot.colorSensorLeft.blue()));
         //opMode.telemetry.addData("Left Red", String.valueOf(robot.colorSensorLeft.red()));
-        opMode.telemetry.addData("LF", String.valueOf(LF));
-        opMode.telemetry.addData("RF", String.valueOf(RF));
-        opMode.telemetry.addData("LR", String.valueOf(LR));
-        opMode.telemetry.addData("RR", String.valueOf(RR));
         opMode.telemetry.update();
     }
 
