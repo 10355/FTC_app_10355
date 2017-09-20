@@ -145,7 +145,7 @@ public class MecanumGyro extends LinearOpMode {
         createDl();
 
         /**
-         * Initialize Vuforia and retrieve the list of trackable objects.
+         * Calibrate the MR Gyro
          */
         robot.sensorGyro.calibrate();
         while (robot.sensorGyro.isCalibrating()) {
@@ -249,87 +249,6 @@ public class MecanumGyro extends LinearOpMode {
     }
 
     /**
-     * Pivot the robot to a new heading. 0 is straight ahead, 1 to 179 is to the left -1 to -179 is
-     * to the right.
-     */
-
-
-    public void motorsHalt() {
-        robot.motorLF.setPower(0);
-        robot.motorRF.setPower(0);
-        robot.motorLR.setPower(0);
-        robot.motorRR.setPower(0);
-    }
-
-    /**
-     * Set the power level of the motors.
-     */
-    public void setPower(double LF, double LR, double RF, double RR) {
-        robot.motorLF.setPower(LF);
-        robot.motorRF.setPower(RF);
-        robot.motorLR.setPower(LR);
-        robot.motorRR.setPower(RR);
-    }
-
-    /**
-     * Calculate the wheel speeds.
-     *
-     * @return wheel speed
-     */
-    public double calcLF(double radians, double power) {
-        LF = power * Math.sin(radians + (Math.PI / 4)) + changeSpeed;
-
-        if (LF > 1 || LF < -1) {
-            LF = 0;
-        }
-
-        return LF;
-    }
-
-    public double calcRF(double radians, double power) {
-        RF = power * Math.cos(radians + (Math.PI / 4)) - changeSpeed;
-
-        if (RF > 1 || RF < -1) {
-            RF = 0;
-        }
-
-        return RF;
-    }
-
-    public double calcLR(double radians, double power) {
-        LR = power * Math.cos(radians + (Math.PI / 4)) + changeSpeed;
-
-        if (LR > 1 || LR < -1) {
-            LR = 0;
-        }
-
-        return LR;
-    }
-
-    public double calcRR(double radians, double power) {
-        RR = power * Math.sin(radians + (Math.PI / 4)) - changeSpeed;
-
-        if (RR > 1 || RR < -1) {
-            RR = 0;
-        }
-
-        return RR;
-    }
-    public double getRadians(double heading) {
-        radians = heading * (Math.PI / 180);
-
-        return radians;
-    }
-
-    String formatAngle(AngleUnit angleUnit, double angle) {
-        return formatDegrees(AngleUnit.DEGREES.fromUnit(angleUnit, angle));
-    }
-
-    String formatDegrees(double degrees){
-        return String.format(Locale.getDefault(), "%.1f", AngleUnit.DEGREES.normalize(degrees));
-    }
-
-    /**
      * Setup the dataLogger
      * The dataLogger takes a set of fields defined here and sets up the file on the Android device
      * to save them to.  We then log data later throughout the class.
@@ -396,7 +315,7 @@ public class MecanumGyro extends LinearOpMode {
      * Enumerate the States of the machine.
      */
     enum State {
-        HALT, DRIVE, TAIL, COLOR_SENSOR, RANGE, AUTONOMUS_BLUE_FRONT, MECANUM, TRANSLATE
+        HALT, DRIVE, TAIL, COLOR_SENSOR, RANGE
     }
 
 }
