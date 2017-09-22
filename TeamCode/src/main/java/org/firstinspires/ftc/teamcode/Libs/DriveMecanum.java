@@ -45,6 +45,7 @@ public class DriveMecanum {
     private double motorCorrectCoefficient = .05;
     private boolean tel = false;
 
+
     public DriveMecanum(HardwareTestPlatform myRobot, LinearOpMode myOpMode, DataLogger myDl) {
         robot = myRobot;
         opMode = myOpMode;
@@ -173,7 +174,7 @@ public class DriveMecanum {
         procedure = "translateDistance";
         initZ = robot.mrGyro.getIntegratedZValue();
         myCurrentMotorPosition = robot.motorLF.getCurrentPosition();
-        myTargetPosition = myCurrentMotorPosition + (int) (mm * robot.COUNTS_PER_MM);
+        //myTargetPosition = myCurrentMotorPosition + (int) (mm * robot.COUNTS_PER_MM);
 
         radians = getRadians(heading);
 

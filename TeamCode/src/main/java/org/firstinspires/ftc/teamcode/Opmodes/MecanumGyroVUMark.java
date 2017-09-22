@@ -46,7 +46,7 @@ public class MecanumGyroVUMark extends LinearOpMode {
     private LinearOpMode opMode = this;                     //Opmode
     private DataLogger Dl;                                  //Datalogger object
     private String alliance = "blue";                       //Your current alliance
-    private State state = State.VUMark;                     //Machine State
+    private State state = State.DRIVE;                     //Machine State
 
     /**
      * {@link #vuforia} is the variable we will use to store our instance of the Vuforia
@@ -142,9 +142,20 @@ public class MecanumGyroVUMark extends LinearOpMode {
 
             switch (state) {
                 case DRIVE:
-                    drive.translateTime(3, .5, 90);
+                    robot.servoLeft.setPosition(1);
+                    sleep(2000);
+                    if (robot.colorSensorLeft.blue() > robot.colorSensorLeft.red()) {  //Blue is back
+                        drive.translateTime(.4, .5, 0);
+                    }
+                    else {
+                        drive.translateTime(.4, .5, 180);
+                    }
+
+                    robot.servoLeft.setPosition(.5);
 
                     drive.translateRange(.5, 0, 25);
+
+                    drive.translateRange(.5, -90, 15);
 
                     state = State.HALT;
 
@@ -163,10 +174,10 @@ public class MecanumGyroVUMark extends LinearOpMode {
                     //telemetry.addData("Right RGB", String.valueOf(robot.colorSensorRight.argb()));
                     //telemetry.addData("Right Blue", String.valueOf(robot.colorSensorRight.blue()));
                     //telemetry.addData("Right Red", String.valueOf(robot.colorSensorRight.red()));
-                    //telemetry.addData("Left RGB", String.valueOf(robot.colorSensorLeft.argb()));
-                    //telemetry.addData("Left Blue", String.valueOf(robot.colorSensorLeft.blue()));
-                    //telemetry.addData("Left Red", String.valueOf(robot.colorSensorLeft.red()));
-                    //telemetry.update();
+                    telemetry.addData("Left RGB", String.valueOf(robot.colorSensorLeft.argb()));
+                    telemetry.addData("Left Blue", String.valueOf(robot.colorSensorLeft.blue()));
+                    telemetry.addData("Left Red", String.valueOf(robot.colorSensorLeft.red()));
+                    telemetry.update();
 
                     break;
 
@@ -178,7 +189,7 @@ public class MecanumGyroVUMark extends LinearOpMode {
                     robot.servoRight.setPosition(.5);
                     robot.servoLeft.setPosition(.5);
                     sleep(2000);
-                    //robot.servoElbow.setPosition(1);
+
                     break;
 
                 case VUMark:

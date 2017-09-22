@@ -7,6 +7,7 @@ import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.GyroSensor;
 import com.qualcomm.robotcore.hardware.HardwareMap;
+import com.qualcomm.robotcore.hardware.I2cAddr;
 import com.qualcomm.robotcore.hardware.OpticalDistanceSensor;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.hardware.TouchSensor;
@@ -44,8 +45,8 @@ public class HardwareTestPlatform {
     static final double     COUNTS_PER_MOTOR_REV    = 1120 ;    // AndyMark 40
     static final double     DRIVE_GEAR_REDUCTION    = 1.0 ;     // This is < 1.0 if geared UP
     static final double     WHEEL_DIAMETER_INCHES   = 4.0 ;     // For figuring circumference
-    static final double     COUNTS_PER_INCH         = (COUNTS_PER_MOTOR_REV * DRIVE_GEAR_REDUCTION) /
-            (WHEEL_DIAMETER_INCHES * 3.1415);
+    static final double     COUNTS_PER_MM         = ((COUNTS_PER_MOTOR_REV * DRIVE_GEAR_REDUCTION) /
+            (WHEEL_DIAMETER_INCHES * 3.1415)) * 25.4;
 
     /* Constructor */
     public HardwareTestPlatform() {
@@ -69,14 +70,14 @@ public class HardwareTestPlatform {
             mrGyro = (ModernRoboticsI2cGyro) sensorGyro;         //MR GyroNew
 
             //Define the color sensors
-            //I2cAddr i2CAddressColorRight = I2cAddr.create8bit(0x3c);
-            //I2cAddr i2CAddressColorLeft = I2cAddr.create8bit(0x4c);
+            //I2cAddr i2CAddressColorRight = I2cAddr.create8bit(0x4c);
+            I2cAddr i2CAddressColorLeft = I2cAddr.create8bit(0x3c);
             //colorSensorRight = hwMap.colorSensor.get("colorR"); //Map the sensor to the hardware
-            //colorSensorLeft = hwMap.colorSensor.get("colorL"); //Map the sensor to the hardware
+            colorSensorLeft = hwMap.colorSensor.get("colorL"); //Map the sensor to the hardware
             //colorSensorRight.setI2cAddress(i2CAddressColorRight);
-            //colorSensorLeft.setI2cAddress(i2CAddressColorLeft);
+            colorSensorLeft.setI2cAddress(i2CAddressColorLeft);
             //colorSensorRight.enableLed(true);
-            //colorSensorLeft.enableLed(true);
+            colorSensorLeft.enableLed(true);
 
             //Define the range sensor
             rangeSensor = hwMap.get(ModernRoboticsI2cRangeSensor.class, "range");
