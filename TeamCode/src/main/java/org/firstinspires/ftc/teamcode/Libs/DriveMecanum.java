@@ -43,7 +43,7 @@ public class DriveMecanum {
     private double radians = 0;
     private double changeSpeed = 0;
     private double motorCorrectCoefficient = .05;
-    private boolean tel = false;
+    private boolean tel = true;
 
 
     public DriveMecanum(HardwareTestPlatform myRobot, LinearOpMode myOpMode, DataLogger myDl) {

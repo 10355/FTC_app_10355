@@ -46,7 +46,7 @@ public class MecanumGyroVUMark extends LinearOpMode {
     private LinearOpMode opMode = this;                     //Opmode
     private DataLogger Dl;                                  //Datalogger object
     private String alliance = "blue";                       //Your current alliance
-    private State state = State.DRIVE;                     //Machine State
+    private State state = State.VUMark;                     //Machine State
 
     /**
      * {@link #vuforia} is the variable we will use to store our instance of the Vuforia
@@ -230,7 +230,7 @@ public class MecanumGyroVUMark extends LinearOpMode {
                         telemetry.addData("vuMarkValue ", vuMarkValue);
                         telemetry.update();
 
-                        state = State.DISPLAY;  //The vuMark was found so move on to the next state
+                        state = State.DRIVE;  //The vuMark was found so move on to the next state
                     }
 
                     break;
