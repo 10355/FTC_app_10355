@@ -71,15 +71,8 @@ public class AutoSetupSensor extends LinearOpMode {
     /**
      * Instantiate all objects needed in this class
      */
-    public static final String TAG = "VuforiaLib Sample";
+
     private final static HardwareTestPlatform robot = new HardwareTestPlatform();
-    private ElapsedTime runtime = new ElapsedTime();
-    // the the current vuforia image
-    private List<Double> vuforiaTracking;
-    private VuforiaLib myVuforia = new VuforiaLib();
-    private DataLogger Dl;
-    Orientation angles;
-    private double initZ = 0;
 
     /**
      * Setup the init state of the robot.  The actions in the begin() method are run when you hit the
@@ -87,35 +80,11 @@ public class AutoSetupSensor extends LinearOpMode {
      */
     private void begin() {
 
-        /** Setup the dataLogger
-         * The dataLogger takes a set of fields defined here and sets up the file on the Android device
-         * to save them to.  We then log data later throughout the class.
-         */
-        Dl = new DataLogger("Sensor_Check" + runtime.time());
-        Dl.addField("touchSensor");
-        Dl.addField("robotX");
-        Dl.addField("robotY");
-        Dl.addField("robotBearing");
-        Dl.addField("zInt");
-        Dl.addField("ODS");
-        Dl.addField("rgb");
-        Dl.addField("rightRed");
-        Dl.addField("rightBlue");
-        Dl.addField("leftRed");
-        Dl.addField("leftBlue");
-        Dl.addField("beacon color");
-        Dl.addField("LRMotorPos");
-        Dl.newLine();
-
         /**
          * Inititialize the robot's hardware.  The hardware configuration can be found in the
          * HardwareTestPlatform.java class.
          */
         robot.init(hardwareMap);
-
-        /**
-         * Calibrate the gyro
-         */
 
         telemetry.addData("Status", "Initialized");
         telemetry.update();
@@ -123,8 +92,6 @@ public class AutoSetupSensor extends LinearOpMode {
 
     public void runOpMode() {
         begin();
-        List<VuforiaTrackable> myTrackables;
-        myTrackables = myVuforia.vuforiaInit();
 
         /**
          * Start the opMode
@@ -135,61 +102,18 @@ public class AutoSetupSensor extends LinearOpMode {
 
         while (opModeIsActive()) {
 
-            vuforiaTracking = myVuforia.getLocation(myTrackables);
-            angles   = robot.imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
-            initZ = Double.parseDouble(formatAngle(angles.angleUnit, angles.firstAngle));
+            telemetry.addData("range", String.valueOf(robot.rangeSensor.rawUltrasonic()));
+            telemetry.addData("colorL", String.valueOf(robot.colorSensorLeft.argb()));
+            telemetry.update();
 
-            logData();
 
             idle();
 
         }
-        //Stop the motors
-        motorsHalt();
-
-        //Stop the DataLogger
-        dlStop();
 
         //Exit the OpMode
         requestOpModeStop();
     }
 
 
-    private void logData() {
-        telemetry.addData("Elapsed Time", String.valueOf(runtime.milliseconds()));
-        telemetry.addData("initZ", String.valueOf(initZ));
-
-
-        telemetry.update();
-
-        Dl.addField(String.valueOf(robot.touchSensor.getValue()));
-
-        Dl.newLine();
-    }
-
-    /**
-     * Stop the DataLogger
-     */
-    private void dlStop() {
-        Dl.closeDataLogger();
-
-    }
-
-    /**
-     * Cut power to the motors.
-     */
-    private void motorsHalt() {
-        robot.motorLF.setPower(0);
-        robot.motorRF.setPower(0);
-        robot.motorLR.setPower(0);
-        robot.motorRR.setPower(0);
-    }
-
-    String formatAngle(AngleUnit angleUnit, double angle) {
-        return formatDegrees(AngleUnit.DEGREES.fromUnit(angleUnit, angle));
-    }
-
-    String formatDegrees(double degrees){
-        return String.format(Locale.getDefault(), "%.1f", AngleUnit.DEGREES.normalize(degrees));
-    }
 }

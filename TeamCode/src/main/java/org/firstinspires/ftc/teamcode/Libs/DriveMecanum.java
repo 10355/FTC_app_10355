@@ -269,6 +269,9 @@ public class DriveMecanum {
             LR = calcLR(radians, power);
             RR = calcRR(radians, power);
 
+            opMode.telemetry.addData("range", robot.rangeSensor.rawUltrasonic());
+            opMode.telemetry.update();
+
             currentZint = robot.mrGyro.getIntegratedZValue();
 
             if (currentZint != initZ) {  //Robot has drifted off course
@@ -374,7 +377,6 @@ public class DriveMecanum {
         opMode.telemetry.addData("Current Z Int", String.valueOf(currentZint));
         opMode.telemetry.addData("Z Correction", String.valueOf(zCorrection));
         opMode.telemetry.addData("Range", String.valueOf(robot.rangeSensor.rawUltrasonic()));
-        opMode.telemetry.addData("Target Encoder Position", String.valueOf(myTargetPosition));
         opMode.telemetry.addData("LF Encoder", String.valueOf(robot.motorLF.getCurrentPosition()));
         opMode.telemetry.addData("LR Encoder", String.valueOf(robot.motorLR.getCurrentPosition()));
         opMode.telemetry.addData("RF Encoder", String.valueOf(robot.motorRF.getCurrentPosition()));
@@ -392,26 +394,7 @@ public class DriveMecanum {
     private void logData() {
 
         Dl.addField(String.valueOf(runtime.time()));
-        Dl.addField(String.valueOf(""));
-        Dl.addField(String.valueOf(""));
-        Dl.addField(String.valueOf(procedure));
-        Dl.addField(String.valueOf(""));
-        Dl.addField(String.valueOf((int) robotX));
-        Dl.addField(String.valueOf((int) robotY));
-        Dl.addField(String.valueOf(""));
-        Dl.addField(String.valueOf(""));
-        Dl.addField(String.valueOf((int) robotBearing));
-        Dl.addField(String.valueOf(initZ));
-        Dl.addField(String.valueOf(currentZint));
-        Dl.addField(String.valueOf(zCorrection));
-        Dl.addField(String.valueOf(robot.touchSensor.getValue()));
-        Dl.addField(String.valueOf(ods));
-        Dl.addField(String.valueOf(colorRightRed));
-        Dl.addField(String.valueOf(colorRightBlue));
-        Dl.addField(String.valueOf(colorLeftRed));
-        Dl.addField(String.valueOf(colorLeftBlue));
-        Dl.addField(String.valueOf(myTargetPosition));
-        Dl.addField(String.valueOf(robot.motorLF.getCurrentPosition()));
+
         Dl.addField(String.valueOf(LF));
         Dl.addField(String.valueOf(RF));
         Dl.addField(String.valueOf(LR));

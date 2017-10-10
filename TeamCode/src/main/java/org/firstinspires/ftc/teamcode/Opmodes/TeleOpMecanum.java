@@ -71,13 +71,6 @@ public class TeleOpMecanum extends LinearOpMode {
          */
         robot.init(hardwareMap);
 
-        robot.motorShooter.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        robot.motorShooter.setTargetPosition(0);
-        robot.motorShooter.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        while (robot.motorShooter.isBusy()) {
-            robot.motorShooter.setPower(.4);
-        }
-
         // Send telemetry message to signify robot waiting;
         telemetry.addData("Say", "Hello Driver");    //
         telemetry.update();
@@ -90,7 +83,7 @@ public class TeleOpMecanum extends LinearOpMode {
         while (opModeIsActive()) {
 
             double r = Math.hypot((gamepad1.left_stick_x * -1), gamepad1.left_stick_y);
-            double robotAngle = Math.atan2(gamepad1.left_stick_y, (gamepad1.left_stick_x * -1)) - Math.PI / 4;
+            double robotAngle = Math.atan2((gamepad1.left_stick_y * -1), (gamepad1.left_stick_x )) - Math.PI / 4;
             double rightX = gamepad1.right_stick_x;
             final double v1 = r * Math.cos(robotAngle) + rightX;
             final double v2 = r * Math.sin(robotAngle) - rightX;
@@ -102,57 +95,45 @@ public class TeleOpMecanum extends LinearOpMode {
             robot.motorLR.setPower(v3);
             robot.motorRR.setPower(v4);
 
-
-            if (gamepad1.left_trigger > 0 && gamepad1.right_trigger == 0) {
-                robot.motorFeeder.setPower(1);
+            if (gamepad1.right_bumper) {
+                robot.servoLiftRight.setPosition(1);
+                robot.servoLiftLeft.setPosition(0);
             }
 
-            if (gamepad1.right_trigger > 0 && gamepad1.left_trigger == 0) {
-                robot.motorFeeder.setPower(-1);
+            if (gamepad1.left_bumper) {
+                robot.servoLiftRight.setPosition(.75);
+                robot.servoLiftLeft.setPosition(.25);
             }
 
-            if (gamepad1.right_trigger == 0 && gamepad1.left_trigger == 0) {
-                robot.motorFeeder.setPower(0);
+            if (gamepad1.right_trigger > 0) {
+                robot.motorLift.setPower(.5);
+            }
+            else {
+                robot.motorLift.setPower(0);
             }
 
-            if (gamepad1.a) {
-                int encoderStop = 1440;
-                double myCurrentPosition;
-
-                robot.motorShooter.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-
-                robot.motorShooter.setTargetPosition(encoderStop);
-                robot.motorShooter.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-
-                while (robot.motorShooter.isBusy()) {
-                    robot.motorShooter.setPower(.4);
-                    myCurrentPosition = robot.motorLF.getCurrentPosition();
-                    telemetry.addData("myCurrentPosition", String.valueOf(myCurrentPosition));
-                    telemetry.update();
-                    idle();
-                }
-
-                motorsHalt();
+            if (gamepad1.left_trigger > 0) {
+                robot.motorLift.setPower(-.5);
             }
+            else {
+                robot.motorLift.setPower(0);
+            }
+
             telemetry.addData("left_stick_x", String.valueOf(gamepad1.left_stick_x));
             telemetry.addData("left_stick_y", String.valueOf(gamepad1.left_stick_y));
             telemetry.addData("right_stick_x", String.valueOf(gamepad1.right_stick_x));
-            telemetry.addData("LF", String.valueOf(v1));
-            telemetry.addData("RF", String.valueOf(v2));
-            telemetry.addData("LR", String.valueOf(v3));
-            telemetry.addData("RR", String.valueOf(v4));
             telemetry.update();
 
             idle();
+            }
+
         }
-    }
 
     public void motorsHalt() {
         robot.motorLF.setPower(0);
         robot.motorRF.setPower(0);
         robot.motorLR.setPower(0);
         robot.motorRR.setPower(0);
-        robot.motorFeeder.setPower(0);
     }
 
     private void begin() {

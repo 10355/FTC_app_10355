@@ -28,8 +28,7 @@ public class HardwareTestPlatform {
     public DcMotor motorRF = null;              //Declare the motor
     public DcMotor motorLR = null;              //Declare the motor
     public DcMotor motorRR = null;              //Declare the motor
-    public DcMotor motorFeeder = null;          //Declare the motor
-    public DcMotor motorShooter = null;          //Declare the motor
+    public DcMotor motorLift = null;          //Declare the motor
     public OpticalDistanceSensor ods;           //Declare the sensor
     public ColorSensor colorSensorRight;        //Declare the Color Sensor
     public ColorSensor colorSensorLeft;        //Declare the Color Sensor
@@ -38,6 +37,8 @@ public class HardwareTestPlatform {
     public ModernRoboticsI2cGyro mrGyro;        //Declare the MR GyroNew
     public Servo servoRight;                   //Declare the servo
     public Servo servoLeft;                   //Declare the servo
+    public Servo servoLiftRight;                   //Declare the servo
+    public Servo servoLiftLeft;                   //Declare the servo
     public BNO055IMU imu = null;
     public ModernRoboticsI2cRangeSensor rangeSensor;
 
@@ -82,6 +83,7 @@ public class HardwareTestPlatform {
             //Define the range sensor
             rangeSensor = hwMap.get(ModernRoboticsI2cRangeSensor.class, "range");
 
+
             //Setup the drive motors
             motorLF = hwMap.dcMotor.get("lf");
             motorLF.setDirection(DcMotor.Direction.REVERSE); // Set to REVERSE if using AndyMark motors
@@ -107,9 +109,24 @@ public class HardwareTestPlatform {
             motorRR.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
             motorRR.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
+            motorLift = hwMap.dcMotor.get("lift");
+            motorLift.setDirection(DcMotor.Direction.FORWARD); // Set to REVERSE if using AndyMark motors
+            motorLift.setPower(0);
+            motorLift.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+            motorLift.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+
+            //motorLift = hwMap.dcMotor.get("lift");
+            //motorLift.setDirection(DcMotor.Direction.FORWARD); // Set to REVERSE if using AndyMark motors
+            //motorLift.setPower(0);
+            //motorLift.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+            //motorLift.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+
             //Setup the servos
             servoRight = hwMap.servo.get("servo0");
             servoLeft = hwMap.servo.get("servo1");
+            servoLiftRight = hwMap.servo.get("liftR");
+            servoLiftLeft = hwMap.servo.get("liftL");
+
         }
     }
 }

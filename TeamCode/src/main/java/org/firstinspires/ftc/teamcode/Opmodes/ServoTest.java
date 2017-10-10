@@ -12,30 +12,22 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.ClassFactory;
-import org.firstinspires.ftc.robotcore.external.matrices.OpenGLMatrix;
-import org.firstinspires.ftc.robotcore.external.matrices.VectorF;
-import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
-import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
-import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
-import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
 import org.firstinspires.ftc.robotcore.external.navigation.RelicRecoveryVuMark;
 import org.firstinspires.ftc.robotcore.external.navigation.VuMarkInstanceId;
 import org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocalizer;
 import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackable;
-import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackableDefaultListener;
 import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackables;
 import org.firstinspires.ftc.teamcode.HardwareProfiles.HardwareTestPlatform;
 import org.firstinspires.ftc.teamcode.Libs.DataLogger;
 import org.firstinspires.ftc.teamcode.Libs.DriveMecanum;
-import org.firstinspires.ftc.teamcode.Libs.VuforiaLib;
 
 /**
  * Name the opMode and put it in the appropriate group
  */
-@Autonomous(name = "Mecanum Gyro VuMark", group = "COMP")
+@Autonomous(name = "Servo Test", group = "COMP")
 
-public class MecanumGyroVUMark extends LinearOpMode {
+public class ServoTest extends LinearOpMode {
 
     /**
      * Instantiate all objects needed in this class
@@ -46,7 +38,7 @@ public class MecanumGyroVUMark extends LinearOpMode {
     private LinearOpMode opMode = this;                     //Opmode
     private DataLogger Dl;                                  //Datalogger object
     private String alliance = "blue";                       //Your current alliance
-    private State state = State.DRIVE;                     //Machine State
+    private State state = State.SERVO;                     //Machine State
 
     /**
      * {@link #vuforia} is the variable we will use to store our instance of the Vuforia
@@ -121,12 +113,8 @@ public class MecanumGyroVUMark extends LinearOpMode {
          * Deploy the color sensor
          */
 
-        robot.servoLiftRight.setPosition(.75);
-        robot.servoLiftLeft.setPosition(.25);
-
-        robot.servoLeft.setPosition(0);
-
-
+        robot.servoLeft.setPosition(.5);
+        robot.servoRight.setPosition(1);
         sleep(2000);
 
         /**
@@ -145,116 +133,15 @@ public class MecanumGyroVUMark extends LinearOpMode {
              */
 
             switch (state) {
-                case DRIVE:
-                    robot.motorLift.setPower(1);
-                    sleep(500);
-                    robot.motorLift.setPower(0);
+                case SERVO:
+                        robot.servoLeft.setPosition(1);
 
-                    robot.servoLeft.setPosition(1);
-                    telemetry.addData("SERVO position", robot.servoLeft.getPosition());
-                    telemetry.update();
-                    sleep(2000);
-                    if (robot.colorSensorLeft.blue() > robot.colorSensorLeft.red()) {  //Blue is back
-                        drive.translateTime(.4, .5, 0);
-                    }
-                    else {
-                        drive.translateTime(.4, .5, 180);
-                    }
+                        sleep(2000);
 
-                    robot.servoLeft.setPosition(0);
+                        robot.servoLiftLeft.setPosition(0);
 
-                    drive.translateRange(.2, 0, 35);
-
-                    drive.translateRange(.2, 90, 30);
-
-                    drive.translateRange(.5, 0, 13);
-
-                    robot.servoLiftRight.setPosition(1);
-                    robot.servoLiftLeft.setPosition(0);
-
-                    drive.translateTime(.5, .5, 180);
-
-                    state = State.HALT;
-
-                    break;
-
-                case RANGE:
-                    while (opModeIsActive()) {
-                        telemetry.addData("raw ultrasonic", robot.rangeSensor.rawUltrasonic());
-                        telemetry.addData("raw optical", robot.rangeSensor.rawOptical());
-                        telemetry.addData("cm optical", "%.2f cm", robot.rangeSensor.cmOptical());
-                        telemetry.addData("cm", "%.2f cm", robot.rangeSensor.getDistance(DistanceUnit.CM));
-                        telemetry.update();
-                    }
-                    break;
-                case COLOR_SENSOR:
-                    //telemetry.addData("Right RGB", String.valueOf(robot.colorSensorRight.argb()));
-                    //telemetry.addData("Right Blue", String.valueOf(robot.colorSensorRight.blue()));
-                    //telemetry.addData("Right Red", String.valueOf(robot.colorSensorRight.red()));
-                    telemetry.addData("Left RGB", String.valueOf(robot.colorSensorLeft.argb()));
-                    telemetry.addData("Left Blue", String.valueOf(robot.colorSensorLeft.blue()));
-                    telemetry.addData("Left Red", String.valueOf(robot.colorSensorLeft.red()));
-                    telemetry.update();
-
-                    break;
-
-                case TAIL:
-                    robot.servoRight.setPosition(1);
-                    robot.servoLeft.setPosition(0);
-
-                    sleep(2000);
-                    robot.servoRight.setPosition(.5);
-                    robot.servoLeft.setPosition(.5);
-                    sleep(2000);
-
-                    break;
-
-                case VUMark:
-                    RelicRecoveryVuMark vuMark = RelicRecoveryVuMark.from(relicTemplate);
-
-                    if (count == 1) {  //Only do this the first time
-                        timeout = 10;
-                        timeout = opMode.getRuntime() + timeout;
-                        count = count + 1;
-                    }
-
-                    /**
-                     * Look for the VuMark for the specified timeout and return the vuMarkValue
-                     * variable for use later in the program.
-                     */
-                    if (vuMark == RelicRecoveryVuMark.UNKNOWN  &&
-                            opMode.getRuntime() < timeout) {
-
-                        vuMarkValue = String.valueOf(vuMark);  //Assign the vuMarkValue variable
-
-                        telemetry.addData("timeout", String.valueOf(timeout));
-                        telemetry.addData("now", String.valueOf(opMode.getRuntime()));
-                        telemetry.addData("vuMarkValue ", vuMarkValue);
-
-                        /**
-                         * See if any of the instances of {@link relicTemplate} are currently visible.
-                         * {@link RelicRecoveryVuMark} is an enum which can have the following values:
-                         * UNKNOWN, LEFT, CENTER, and RIGHT. When a VuMark is visible, something other than
-                         * UNKNOWN will be returned by {@link RelicRecoveryVuMark#from(VuforiaTrackable)}.
-                         */
-
-                        telemetry.addData("VuMark", "%s visible", vuMark);
-
-                        telemetry.update();
-                    } else {
-                        vuMarkValue = String.valueOf(vuMark);
-                        telemetry.addData("VuMark", "%s visible", vuMark);
-                        telemetry.addData("vuMarkValue ", vuMarkValue);
-                        telemetry.update();
-
-                        state = State.DRIVE;  //The vuMark was found so move on to the next state
-                    }
-
-                    break;
-
-                case DISPLAY:
-                    telemetry.addData("vuMarkValue", String.valueOf(vuMarkValue));
-                    telemetry.update();
+                        sleep(2000);
+                        state = State.SERVO;
                     break;
 
                 case HALT:
@@ -322,7 +209,7 @@ public class MecanumGyroVUMark extends LinearOpMode {
      * Enumerate the States of the machine.
      */
     enum State {
-        HALT, DRIVE, TAIL, COLOR_SENSOR, RANGE, VUMark, DISPLAY
+        HALT, SERVO
     }
 
 }
