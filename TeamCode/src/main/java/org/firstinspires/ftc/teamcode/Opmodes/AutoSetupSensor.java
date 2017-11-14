@@ -56,6 +56,7 @@ import java.util.Locale;
  * Name the opMode and put it in the appropriate group
  */
 @Autonomous(name = "SETUP - Check Sensors", group = "SETUP")
+
 /**
  * This opMode attempts to acquire and trigger the rightRed beacons.
  *
