@@ -102,7 +102,6 @@ public class TeleOp_test extends LinearOpMode {
             robot.motorLR.setPower(vlr);
             robot.motorRR.setPower(vrr);
 
-
             if (gamepad1.right_bumper) {
                 robot.servoLiftRight.setPosition(1);
                 robot.servoLiftLeft.setPosition(0);
