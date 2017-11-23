@@ -5,6 +5,7 @@ import com.qualcomm.hardware.modernrobotics.ModernRoboticsI2cGyro;
 import com.qualcomm.hardware.modernrobotics.ModernRoboticsI2cRangeSensor;
 import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.GyroSensor;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.I2cAddr;
@@ -28,17 +29,19 @@ public class HardwareTestPlatform {
     public DcMotor motorRF = null;              //Declare the motor
     public DcMotor motorLR = null;              //Declare the motor
     public DcMotor motorRR = null;              //Declare the motor
-    public DcMotor motorLift = null;          //Declare the motor
+    public DcMotor motorLift = null;            //Declare the motor
+    public DcMotor motorRelicArm = null;        //Declare the motor
     public OpticalDistanceSensor ods;           //Declare the sensor
     public ColorSensor colorSensorRight;        //Declare the Color Sensor
-    public ColorSensor colorSensorLeft;        //Declare the Color Sensor
+    public ColorSensor colorSensorLeft;         //Declare the Color Sensor
     public TouchSensor touchSensor;             //Declare the Touch Sensor
     public GyroSensor sensorGyro;               //Declare the GyroNew sensor
     public ModernRoboticsI2cGyro mrGyro;        //Declare the MR GyroNew
-    public Servo servoRight;                   //Declare the servo
-    public Servo servoLeft;                   //Declare the servo
-    public Servo servoLiftRight;                   //Declare the servo
-    public Servo servoLiftLeft;                   //Declare the servo
+    public Servo servoRight;                    //Declare the servo
+    public Servo servoLeft;                     //Declare the servo
+    public Servo servoLiftRight;                //Declare the servo
+    public Servo servoLiftLeft;                 //Declare the servo
+    public Servo servoRelicGrab;                //Declare the servo
     public BNO055IMU imu = null;
     public ModernRoboticsI2cRangeSensor rangeSensor;
 
@@ -71,17 +74,19 @@ public class HardwareTestPlatform {
             mrGyro = (ModernRoboticsI2cGyro) sensorGyro;         //MR GyroNew
 
             //Define the color sensors
-            //I2cAddr i2CAddressColorRight = I2cAddr.create8bit(0x4c);
+            I2cAddr i2CAddressColorRight = I2cAddr.create8bit(0x4c);
             I2cAddr i2CAddressColorLeft = I2cAddr.create8bit(0x3c);
-            //colorSensorRight = hwMap.colorSensor.get("colorR"); //Map the sensor to the hardware
+            colorSensorRight = hwMap.colorSensor.get("colorR"); //Map the sensor to the hardware
             colorSensorLeft = hwMap.colorSensor.get("colorL"); //Map the sensor to the hardware
-            //colorSensorRight.setI2cAddress(i2CAddressColorRight);
+            colorSensorRight.setI2cAddress(i2CAddressColorRight);
             colorSensorLeft.setI2cAddress(i2CAddressColorLeft);
-            //colorSensorRight.enableLed(true);
+            colorSensorRight.enableLed(true);
             colorSensorLeft.enableLed(true);
 
             //Define the range sensor
+            I2cAddr i2CAddressRangeLeft = I2cAddr.create8bit(0x28);
             rangeSensor = hwMap.get(ModernRoboticsI2cRangeSensor.class, "range");
+            rangeSensor.setI2cAddress(i2CAddressRangeLeft);
 
 
             //Setup the drive motors
@@ -109,7 +114,7 @@ public class HardwareTestPlatform {
             motorRR.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
             motorRR.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
-            motorLift = hwMap.dcMotor.get("lift");
+            motorLift = hwMap.dcMotor.get("blockHolder");
             motorLift.setDirection(DcMotor.Direction.FORWARD); // Set to REVERSE if using AndyMark motors
             motorLift.setPower(0);
             motorLift.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
@@ -121,11 +126,19 @@ public class HardwareTestPlatform {
             //motorLift.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
             //motorLift.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
+            motorRelicArm = hwMap.dcMotor.get("relicArm");
+            motorRelicArm.setDirection(DcMotor.Direction.FORWARD);
+            motorRelicArm.setPower(0);
+            motorRelicArm.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+            motorRelicArm.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+
+
             //Setup the servos
             servoRight = hwMap.servo.get("servo0");
             servoLeft = hwMap.servo.get("servo1");
             servoLiftRight = hwMap.servo.get("liftR");
             servoLiftLeft = hwMap.servo.get("liftL");
+            servoRelicGrab = hwMap.servo.get("relicGrab");
 
         }
     }

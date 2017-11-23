@@ -14,25 +14,32 @@ package org.firstinspires.ftc.teamcode.Opmodes;
 
     Hardware Setup  (NEEDS TO BE UPDATED):
         - 4 mecanum wheels with encoder on LF wheel - encoder utilized for measuring distance for fwd/rev drive operation
-        - Arm Motor with encoder - controls mechanism for dumping particles into ramp
+        - Arm Motor with encoder - controls mechanism for retrieving and placing glyphs
+        - Arm motor with encoder - controls mechanism for retrieving and placing relics
+        - Servos
+            - 2 for controlling arms for removing gems
+            - 2 for controlling glyph retrieval
+            - 2 micro servos for controlling glyph manipulation wheels
+            - 1 for controlling relic retrieval system
+            - 1 for controlling balancing stone manipulation
         - Gyro sensor located at the center of the robot - utilized to compensate for drift
-        - 1 x Color sensor (colorSensorLeft)- utilized to identify beacon color
+        - 2 x Color sensor (colorSensorLeft)- utilized to identify gem color
         - 1 x Touch sensor - utilized to identify when robot touches wall with the front of the robot
-        - 1 x Optical Distance Sensor (ODS) - utilized to locate the white lines on the floor
-        - 1 x Motorola Camera - Utilized for Vuforia positioning of the robot on the field
+        - 1 x Range Sensor - utilized to position distance from wall during autonomous mode
+        - 1 x Motorola Camera - Utilized for decrypting the location of the glyph in autonomous mode
 
     State Order (NEEDS TO BE UPDATED):
-        - ACQUIRE_RED_BEACON_LEFT       // moves from the wall to the first beacon closest to the ramp
-        - PUSH_BUTTON_RED               // Identifies which button to press, right or left
-        - PRESS_BUTTON                  // presses the correct button - also validates that the button is pressed
-                                        // and attempts to press over again until the button is pressed
-        - ACQUIRE_RED_BEACON_RIGHT      // moves from the wall to the second beacon on the right of the field
-        - PUSH_BUTTON_RED               // Identifies which button to press, right or left
-        - PRESS_BUTTON                  // presses the correct button - also validates that the button is pressed
-                                        // and attempts to press over again until the button is pressed
-        - END_GAME                      // identifies the last actions before the end of autonomous mode
-        - RAMP                          // For this strategy, the robot will end with a wheel parked on the ramp
+        - ACQUIRECODE                   // Reads image to determine which column to place the glyph
+        - REMOVEGEM                     // Determines which gem to remove and knocks it from the mount
+        - RETRIEVEGLYPH2                // Goes to the center of the field and retrieves a second
+                                        // glyph to place in the glyph box
+        - FINDCOLUMN                    // locates the correct position to place the glyph in during
+                                        // autonomous mode
+        - PLACEGLYPH                    // places the glyphs in the correct column and backs away
+                                        // into the safe zone for full points
         - HALT                          // Shutdown sequence for autonomous mode
+        - TEST                          // Temporary state for testing specific functions without
+                                        // impacting the rest of the program
 
  */
 
@@ -40,36 +47,27 @@ package org.firstinspires.ftc.teamcode.Opmodes;
  * Import the classes we need to have local access to.
  */
 
-import org.firstinspires.ftc.robotcontroller.external.samples.ConceptVuforiaNavigation;
+import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.ClassFactory;
 import org.firstinspires.ftc.robotcore.external.matrices.OpenGLMatrix;
-// import org.firstinspires.ftc.robotcore.external.matrices.VectorF;
-// import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
-// import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
-// import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
-// import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
 import org.firstinspires.ftc.robotcore.external.navigation.RelicRecoveryVuMark;
 import org.firstinspires.ftc.robotcore.external.navigation.VuMarkInstanceId;
 import org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocalizer;
 import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackable;
-import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackableDefaultListener;
 import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackables;
-import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
-import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
-import com.qualcomm.robotcore.util.ElapsedTime;
 import org.firstinspires.ftc.teamcode.HardwareProfiles.HardwareTestPlatform;
 import org.firstinspires.ftc.teamcode.Libs.DataLogger;
 import org.firstinspires.ftc.teamcode.Libs.VuforiaLib;
 
-// import java.util.List;
-
 /**
  * Name the opMode and put it in the appropriate group
  */
-@Autonomous(name = "Auto Red 1 ", group = "COMP")
+@Autonomous(name = "Auto Blue 1 ", group = "COMP")
 
-public class autoRed_Test extends LinearOpMode {
+public class autoBlue_Test extends LinearOpMode {
 
     /**
      * Instantiate all objects needed in this class
@@ -84,6 +82,7 @@ public class autoRed_Test extends LinearOpMode {
      */
     private double mm = 500;            //Distance for translateDistance method
     private double power = .6;          //Motor power for all methods
+    private double distance = 0;        //Distance in cm that the robot will travel for translateDistance() function
     private double heading = 90;        //Heading for all methods
     private double y = -200;            //Vuforia y stop coordinate
     private double x = -200;            //Vuforia x stop coordinate
@@ -104,15 +103,13 @@ public class autoRed_Test extends LinearOpMode {
     private double myTargetPosition;        //Target encoder position
     private DataLogger Dl;                          //Datalogger object
     private double motorCorrectCoefficient = .05;    //Amount to divide the zInt drift by
-    private String beaconColorRight;                //Color of the right side of the beacon
-    private String beaconColorLeft;                 //Color of the left side of the beacon
     private String alliance = "red";                //Your current alliance
     private String color = "";
-    private autoRed_Test.State state = autoRed_Test.State.ACQUIRECODE;    //Machine State
-    private String nextState = "Beacon2";
+    private autoBlue_Test.State state = autoBlue_Test.State.ACQUIRECODE;    //Machine State
 
 
     public static final String TAG = "Vuforia VuMark Sample";
+    public static final double COUNTS_PER_MM = 3.509;
 
     OpenGLMatrix lastLocation = null;
 
@@ -242,40 +239,56 @@ public class autoRed_Test extends LinearOpMode {
                     break;
 
                 case REMOVEGEM:
-                    robot.servoLeft.setPosition(.4);        // Place the left arm between the gems
+                    robot.servoLeft.setPosition(.45);        // Place the left arm between the gems
                     getColor();
 
-                    if (color  == "red"){
-                        heading = 180;              // back away from the beacon
-                        power = 1;                  // apply full power
-                        timeOut = .5;               // backup for 1/2 second
+                    if (color  == "blue"){
+                        heading = 180;              // Direction to move
+                        power = .5;                  // apply full power
+                        timeOut = .2;               // backup for 1/2 second
                         translateTime();            // apply parameters
 
                         robot.servoLeft.setPosition(0);  // Raise arm
 
-                        heading = 0;              // back away from the beacon
+                        heading = 0;              // Direction to move
                         power = 1;                  // apply full power
-                        timeOut = 1;               // backup for 1/2 second
+                        timeOut = .75;               // backup for 1/2 second
                         translateTime();            // apply parameters
 
                         telemetry.addData("Detected ", "RED");
 
-                    } else if (color == "blue"){
-                        heading = 0;              // back away from the beacon
-                        power = 1;                  // apply full power
-                        timeOut = .5;               // backup for 1/2 second
+                    } else if (color == "red"){
+                        heading = 0;              // Direction to move
+                        power = .5;                  // apply full power
+                        timeOut = .25;               // backup for 1/2 second
                         translateTime();            // apply parameters
                         telemetry.addData("Detected ", "BLUE");
+
+                        robot.servoLeft.setPosition(0);  // Raise arm
+
+                        heading = 0;              // Direction to move
+                        power = .5;                  // apply full power
+                        timeOut = .25;               // backup for 1/2 second
+                        translateTime();            // apply parameters
                     }
 
-                    robot.servoLeft.setPosition(0);  // Raise arm
 
                     telemetry.update();
 
-                    sleep(25000);                // Pause for 1 second once the white line is located to allow
+//                    sleep(25000);                // Pause for 1 second once the white line is located to allow
                     // for the Vuforia to acquire positioning data
 
+                    state = State.RETRIEVEGLYPH2;         // Change to the next state
+                    break;
+
+                case TEST:
+
+                    distance = 100;             // distance in cm for how far forward to go.
+                    power = .5;
+                    translateDistance();
+
                     state = State.HALT;         // Change to the next state
+
                     break;
 
                 case RETRIEVEGLYPH2:
@@ -287,7 +300,7 @@ public class autoRed_Test extends LinearOpMode {
                     translateTime();            // apply parameters
 
                     //rotate the robot 90 degrees to align with glyph and glyph box
-                    heading = 90;                // set heading 90 degrees from current position => may need to adjust based on gyro tolerance
+                    heading = 180;                // set heading 90 degrees from current position => may need to adjust based on gyro tolerance
                     power = .5;                  // apply partial power to help control turn
                     pivot ();                    // align the robot to the glyphs/crypto box
 
@@ -298,24 +311,24 @@ public class autoRed_Test extends LinearOpMode {
                     loadGlyph();
 
                     //
-                    state = State.PLACEGLYPH;     // put both glyphs in the correct column
+                    state = State.HALT;     // put both glyphs in the correct column
                     break;
 
                 case FINDCOLUMN:
                     // Position the robot in starting position (next to the balancing stone
-                    heading = 180;                // back away from the beacon
+                    heading = 180;                // Direction to move
                     power = 1;                  // apply full power
                     timeOut = 2;               // backup for 1/2 second
                     translateTime();            // apply parameters
 
-                    heading = 270;                // back away from the beacon
+                    heading = 270;                // Direction to move
                     power = 1;                  // apply full power
                     timeOut = .25;               // backup for 1/2 second
                     translateTime();            // apply parameters
 
 
                     // drive towards the cryptobox using the distance sensor
-                    heading = 180;                // back away from the beacon
+                    heading = 180;                // Direction to move
                     power = .5;                  // apply full power
                     translateSensorDistance();   // apply parameters
 
@@ -367,7 +380,6 @@ public class autoRed_Test extends LinearOpMode {
             if (blue >= 2) {
                 color = "blue";
             }
-            beaconColorRight = color;
 
             telemetry.addData("Red Value = ", red);
             telemetry.addData("Blue Value = ", blue);
@@ -418,9 +430,7 @@ public class autoRed_Test extends LinearOpMode {
 
             idle();
         }
-
         motorsHalt();
-
     }
 
 **/
@@ -455,25 +465,25 @@ public class autoRed_Test extends LinearOpMode {
 
             idle();
         }
-
         motorsHalt();
-
     }
-
 
     /**
      * Pivot the robot to a new heading. 0 is straight ahead, 1 to 179 is to the left -1 to -179 is
      * to the right.
      */
+    /**
     private void pivot() {
         procedure = "Pivot";
         initZ = robot.mrGyro.getIntegratedZValue();
 
+        telemetry.addData("Gyro Value = ", initZ);
+        telemetry.update();
+
+        sleep(20000);
+
         if (heading > 0) {
             while (currentZint < heading && opModeIsActive()) {
-                /**
-                 * We are pivoting left so reverse power to the left motor
-                 */
                 LR = -power;
                 LF = -power;
                 RR = power;
@@ -489,9 +499,6 @@ public class autoRed_Test extends LinearOpMode {
 
             if (heading < 0 && opModeIsActive()) {
                 while (currentZint < heading) {
-                    /**
-                     * We are pivoting right so reverse power to the right motor
-                     */
                     LR = power;
                     LF = power;
                     RR = -power;
@@ -508,17 +515,53 @@ public class autoRed_Test extends LinearOpMode {
         }
         motorsHalt();
     }
+**/
 
     /**
-     * Translate on a heading the distance specified in MM.
+     * Pivot the robot to a new heading. 0 is straight ahead, 1 to 179 is to the left -1 to -179 is
+     * to the right.
+     */
+    private void pivot() {
+        procedure = "Pivot";
+        initZ = robot.mrGyro.getIntegratedZValue();
+
+        telemetry.addData("Gyro Value = ", initZ);
+        telemetry.update();
+
+        sleep(5000);
+
+        LR = -power;
+        LF = -power;
+        RR = power;
+        RF = power;
+
+        setPower();
+
+        while (currentZint < heading && opModeIsActive()) {
+
+            getSensorData();
+
+            telemetry.addData("currentZint Value = ", currentZint);
+            telemetry.update();
+
+            logData();
+            idle();
+        }
+        motorsHalt();
+        sleep(5000);
+    }
+
+    /**
+     * Translate on a heading the distance specified in cm.  Will convert to mm within the function.
      */
     private void translateDistance() {
         procedure = "translateDistance";
         initZ = robot.mrGyro.getIntegratedZValue();
         myCurrentMotorPosition = robot.motorLF.getCurrentPosition();
+        private double mmDistance = distance * 10;
 
         //  Need to determine COUNTS_PER_MM configuration
-        //        myTargetPosition = myCurrentMotorPosition + (int) (mm * robot.COUNTS_PER_MM);
+        myTargetPosition = myCurrentMotorPosition + (mmDistance * COUNTS_PER_MM );
 
         getSensorData();
 
@@ -551,9 +594,7 @@ public class autoRed_Test extends LinearOpMode {
 
             idle();
         }
-
-        motorsHalt();
-
+        motorsHalt();               // shut down all of the motors before exiting function
     }
 
     /**
@@ -594,9 +635,7 @@ public class autoRed_Test extends LinearOpMode {
 
             idle();
         }
-
         motorsHalt();
-
     }
 
     /**
@@ -610,7 +649,6 @@ public class autoRed_Test extends LinearOpMode {
         if (LF > 1 || LF < -1) {
             LF = 0;
         }
-
         return LF;
     }
 
@@ -620,7 +658,6 @@ public class autoRed_Test extends LinearOpMode {
         if (RF > 1 || RF < -1) {
             RF = 0;
         }
-
         return RF;
     }
 
@@ -630,7 +667,6 @@ public class autoRed_Test extends LinearOpMode {
         if (LR > 1 || LR < -1) {
             LR = 0;
         }
-
         return LR;
     }
 
@@ -640,10 +676,8 @@ public class autoRed_Test extends LinearOpMode {
         if (RR > 1 || RR < -1) {
             RR = 0;
         }
-
         return RR;
     }
-
 
     private void getSensorData() {
         colorRightRed = robot.colorSensorRight.red();
@@ -651,9 +685,8 @@ public class autoRed_Test extends LinearOpMode {
         colorLeftRed = robot.colorSensorLeft.red();
         colorLeftBlue = robot.colorSensorLeft.blue();
 //        ods = robot.ods.getLightDetected();
-//        currentZint = robot.mrGyro.getIntegratedZValue();
+        currentZint = robot.mrGyro.getIntegratedZValue();
     }
-
 
     private void createDl() {
 
@@ -712,7 +745,6 @@ public class autoRed_Test extends LinearOpMode {
         Dl.newLine();
     }
 
-
     /**
      * Stop the DataLogger
      */
@@ -729,8 +761,6 @@ public class autoRed_Test extends LinearOpMode {
         telemetry.addData("Alliance", String.valueOf(alliance));
         telemetry.addData("State", String.valueOf(state));
         telemetry.addData("Procedure", String.valueOf(procedure));
-        telemetry.addData("beaconColorRight", String.valueOf(beaconColorRight));
-        telemetry.addData("beaconColorLeft", String.valueOf(beaconColorLeft));
         telemetry.addData("Heading", String.valueOf(heading));
         telemetry.addData("Target X", String.valueOf(x));
         telemetry.addData("Target Y", String.valueOf(y));
@@ -774,7 +804,6 @@ public class autoRed_Test extends LinearOpMode {
 
         robot.servoLiftLeft.setPosition(.6);
         robot.servoLiftRight.setPosition(.6);
-
     }
 
     /**
@@ -795,7 +824,6 @@ public class autoRed_Test extends LinearOpMode {
             RR = RR + motorCorrectCoefficient;
         }
     }
-
 
     /**
      * Set the power level of the motors.
@@ -825,7 +853,7 @@ public class autoRed_Test extends LinearOpMode {
      * Enumerate the States of the machine.
      */
     enum State {
-        ACQUIRECODE, REMOVEGEM, RETRIEVEGLYPH2, FINDCOLUMN, PLACEGLYPH, HALT
+        ACQUIRECODE, REMOVEGEM, RETRIEVEGLYPH2, FINDCOLUMN, PLACEGLYPH, HALT, TEST
     }
 
 }

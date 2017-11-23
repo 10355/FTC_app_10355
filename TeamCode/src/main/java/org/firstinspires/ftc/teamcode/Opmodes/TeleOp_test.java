@@ -75,6 +75,8 @@ public class TeleOp_test extends LinearOpMode {
         telemetry.update();
 
         // Wait for the game to start (driver presses PLAY)
+        telemetry.addData("Waiting for Teleop to start.", "");    //
+        telemetry.update();
         waitForStart();
         telemetry.addData("Teleop Test Active", "");    //
         telemetry.update();
@@ -85,6 +87,11 @@ public class TeleOp_test extends LinearOpMode {
             double speed = Math.hypot(gamepad1.left_stick_x, gamepad1.left_stick_y);
             double robotAngle = Math.atan2((gamepad1.left_stick_y), (gamepad1.left_stick_x )) - Math.PI / 4;
             double rightX = gamepad1.right_stick_x;
+
+            telemetry.addData("Speed Value = ", speed);
+            telemetry.addData("Robot Angle", robotAngle);
+            telemetry.addData("rightX", rightX);
+
             final double vlf = speed * Math.cos(robotAngle) + rightX;
             final double vrf = speed * Math.sin(robotAngle) - rightX;
             final double vlr = speed * Math.sin(robotAngle) + rightX;
@@ -120,6 +127,10 @@ public class TeleOp_test extends LinearOpMode {
                 robot.motorLift.setPower(0);
             }
 
+            telemetry.addData("vlf = ", vlf);
+            telemetry.addData("vlr = ", vlr);
+            telemetry.addData("vrf = ", vrf);
+            telemetry.addData("vrr = ", vrr);
             telemetry.addData("left_stick_x", String.valueOf(gamepad1.left_stick_x));
             telemetry.addData("left_stick_y", String.valueOf(gamepad1.left_stick_y));
             telemetry.addData("right_stick_x", String.valueOf(gamepad1.right_stick_x));
