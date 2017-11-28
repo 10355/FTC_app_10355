@@ -37,6 +37,7 @@ package org.firstinspires.ftc.teamcode.Opmodes;
  */
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
@@ -56,6 +57,7 @@ import java.util.Locale;
  * Name the opMode and put it in the appropriate group
  */
 @Autonomous(name = "SETUP - Check Sensors", group = "SETUP")
+@Disabled
 
 /**
  * This opMode attempts to acquire and trigger the rightRed beacons.
@@ -72,6 +74,12 @@ public class AutoSetupSensor extends LinearOpMode {
     /**
      * Instantiate all objects needed in this class
      */
+    public double colorRightRed = 0;
+    public double colorRightBlue = 0;
+    public double colorLeftRed = 0;
+    public double colorLeftBlue = 0;
+    public double currentZint = 0;
+    public double rangeDistance = 0;
 
     private final static HardwareTestPlatform robot = new HardwareTestPlatform();
 
@@ -94,6 +102,7 @@ public class AutoSetupSensor extends LinearOpMode {
     public void runOpMode() {
         begin();
 
+
         /**
          * Start the opMode
          */
@@ -103,8 +112,14 @@ public class AutoSetupSensor extends LinearOpMode {
 
         while (opModeIsActive()) {
 
-            telemetry.addData("range", String.valueOf(robot.rangeSensor.rawUltrasonic()));
-            telemetry.addData("colorL", String.valueOf(robot.colorSensorLeft.argb()));
+            getSensorData();
+
+            telemetry.addData("range = ", rangeDistance);
+            telemetry.addData("gyro = ", currentZint);
+            telemetry.addData("colorLeftRed = ", colorLeftRed);
+            telemetry.addData("colorLeftBlue = ", colorLeftBlue);
+            telemetry.addData("colorRightRed = ", colorRightRed);
+            telemetry.addData("colorRightBlue = ", colorRightBlue);
             telemetry.update();
 
 
@@ -114,6 +129,16 @@ public class AutoSetupSensor extends LinearOpMode {
 
         //Exit the OpMode
         requestOpModeStop();
+    }
+
+
+    private void getSensorData() {
+        colorRightRed = robot.colorSensorRight.red();
+        colorRightBlue = robot.colorSensorRight.blue();
+        colorLeftRed = robot.colorSensorLeft.red();
+        colorLeftBlue = robot.colorSensorLeft.blue();
+        currentZint = robot.mrGyro.getIntegratedZValue();
+        rangeDistance = robot.rangeSensor.cmUltrasonic();
     }
 
 
