@@ -48,6 +48,7 @@ package org.firstinspires.ftc.teamcode.Opmodes;
  */
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
@@ -66,6 +67,7 @@ import org.firstinspires.ftc.teamcode.Libs.VuforiaLib;
  * Name the opMode and put it in the appropriate group
  */
 @Autonomous(name = "Auto Blue 1 ", group = "COMP")
+@Disabled
 
 public class autoBlue_Test extends LinearOpMode {
 
@@ -89,6 +91,7 @@ public class autoBlue_Test extends LinearOpMode {
     private double changeSpeed = 0;     //Rotation speed for motor speed calculations
     private double initZ;               //The initial reading from integrated Z
     private double currentZint;         //Current integrated Z value
+    private double rangeDistance;       // Distance received by Range sensor in CM
     private double zCorrection;         //Course correction in degrees
     private double timeOut = 5;         //Timeout in seconds for translateTime method
     private double timeOutTime;         //Calculated time to stop
@@ -105,8 +108,8 @@ public class autoBlue_Test extends LinearOpMode {
     private double motorCorrectCoefficient = .05;    //Amount to divide the zInt drift by
     private String alliance = "red";                //Your current alliance
     private String color = "";
-    private autoBlue_Test.State state = autoBlue_Test.State.ACQUIRECODE;    //Machine State
-
+    private autoBlue_Test.State state = State.ACQUIRECODE;    //Machine State
+    private int columnCount = 0;
 
     public static final String TAG = "Vuforia VuMark Sample";
     public static final double COUNTS_PER_MM = 3.509;
@@ -150,7 +153,7 @@ public class autoBlue_Test extends LinearOpMode {
          * Here we chose the back (HiRes) camera (for greater range), but
          * for a competition robot, the front camera might be more convenient.
          */
-        parameters.cameraDirection = VuforiaLocalizer.CameraDirection.BACK;
+        parameters.cameraDirection = VuforiaLocalizer.CameraDirection.FRONT;
         this.vuforia = ClassFactory.createVuforiaLocalizer(parameters);
 
         /**
@@ -195,6 +198,7 @@ public class autoBlue_Test extends LinearOpMode {
         telemetry.addData(">", "Ready");
         telemetry.update();
 
+
         /**
          * Start the opMode
          */
@@ -234,6 +238,7 @@ public class autoBlue_Test extends LinearOpMode {
                         telemetry.addData("VuMark", "not visible");
                     }
 
+                    telemetry.addData("State = ","REMOVEGEM");
                     telemetry.update();
 
                     break;
@@ -245,33 +250,47 @@ public class autoBlue_Test extends LinearOpMode {
                     if (color  == "blue"){
                         heading = 180;              // Direction to move
                         power = .5;                  // apply full power
-                        timeOut = .2;               // backup for 1/2 second
-                        translateTime();            // apply parameters
+//                        timeOut = .2;               // backup for 1/2 second
+                        distance = 4;               // move forward
+                        translateDistance();
+//                        translateTime();            // apply parameters
 
                         robot.servoLeft.setPosition(0);  // Raise arm
 
                         heading = 0;              // Direction to move
                         power = 1;                  // apply full power
-                        timeOut = .75;               // backup for 1/2 second
-                        translateTime();            // apply parameters
+//                        timeOut = .25;               // backup for 1/2 second
+//                        translateTime();            // apply parameters
+                        distance = 6;               // move forward
+                        translateDistance();
 
-                        telemetry.addData("Detected ", "RED");
+                        telemetry.addData("Detected ", "BLUE");
 
                     } else if (color == "red"){
                         heading = 0;              // Direction to move
                         power = .5;                  // apply full power
-                        timeOut = .25;               // backup for 1/2 second
-                        translateTime();            // apply parameters
-                        telemetry.addData("Detected ", "BLUE");
+                        distance = 6;               // move forward
+                        translateDistance();
+//                        timeOut = .25;               // backup for 1/2 second
+//                        translateTime();            // apply parameters
+                        telemetry.addData("Detected ", "RED");
 
                         robot.servoLeft.setPosition(0);  // Raise arm
 
-                        heading = 0;              // Direction to move
-                        power = .5;                  // apply full power
-                        timeOut = .25;               // backup for 1/2 second
-                        translateTime();            // apply parameters
+
+//                        timeOut = .75;               // backup for 1/2 second
+//                        translateTime();            // apply parameters
                     }
 
+                    heading = 0;              // Direction to move
+                    power = .5;                  // apply full power
+                    distance = 40;               // move forward
+                    translateDistance();
+
+                    //rotate the robot 90 degrees to align with glyph and glyph box
+                    heading = -75;                // set heading 90 degrees from current position => may need to adjust based on gyro tolerance
+                    power = .5;                  // apply partial power to help control turn
+                    pivot ();                    // align the robot to the glyphs/crypto box
 
                     telemetry.update();
 
@@ -279,30 +298,28 @@ public class autoBlue_Test extends LinearOpMode {
                     // for the Vuforia to acquire positioning data
 
                     state = State.RETRIEVEGLYPH2;         // Change to the next state
+                    telemetry.addData("State = ","RETRIEVEGLYPH2");
+                    telemetry.update();
                     break;
 
                 case TEST:
 
-                    distance = 100;             // distance in cm for how far forward to go.
-                    power = .5;
-                    translateDistance();
+                    getSensorData();
 
-                    state = State.HALT;         // Change to the next state
+                    while (opModeIsActive() & columnCount < 2) {
+                        strafeLeft();
+                        columnCount = columnCount++;
+                        getSensorData();
+                        telemetry.addData("Range Distance = ",rangeDistance);
+                        telemetry.update();
+
+                    }
+
 
                     break;
 
                 case RETRIEVEGLYPH2:
 
-                    // drive off of the balancing stone
-                    heading = 0;                // Set heading in forward direction
-                    power = 1;                  // apply full power
-                    timeOut = .5;               // drive for 1/2 second
-                    translateTime();            // apply parameters
-
-                    //rotate the robot 90 degrees to align with glyph and glyph box
-                    heading = 180;                // set heading 90 degrees from current position => may need to adjust based on gyro tolerance
-                    power = .5;                  // apply partial power to help control turn
-                    pivot ();                    // align the robot to the glyphs/crypto box
 
                     // set the arm to pick up a second glyph
                     setArm();
@@ -312,14 +329,16 @@ public class autoBlue_Test extends LinearOpMode {
 
                     //
                     state = State.HALT;     // put both glyphs in the correct column
+                    telemetry.addData("State = ","HALT");
+                    telemetry.update();
                     break;
 
                 case FINDCOLUMN:
                     // Position the robot in starting position (next to the balancing stone
                     heading = 180;                // Direction to move
-                    power = 1;                  // apply full power
+                    power = .5;                  // apply full power
                     timeOut = 2;               // backup for 1/2 second
-                    translateTime();            // apply parameters
+                    translateDistance();            // apply parameters
 
                     heading = 270;                // Direction to move
                     power = 1;                  // apply full power
@@ -330,12 +349,11 @@ public class autoBlue_Test extends LinearOpMode {
                     // drive towards the cryptobox using the distance sensor
                     heading = 180;                // Direction to move
                     power = .5;                  // apply full power
-                    translateSensorDistance();   // apply parameters
+                    translateDistance();   // apply parameters
 
                     break;
 
                 case PLACEGLYPH:              // State to place the glyph in the cryptobox
-
 
                     heading = 0;                // set heading towards glyphs
                     power = 1;                  // apply full power
@@ -434,14 +452,50 @@ public class autoBlue_Test extends LinearOpMode {
     }
 
 **/
+
+    private void strafeLeft() {
+        power = .25;
+
+        /**
+        final double vlf = power * Math.cos(270);
+        final double vrf = power * Math.sin(270);
+        final double vlr = power * Math.sin(270);
+        final double vrr = power * Math.cos(270);
+         **/
+
+        final double vlf = .20;
+        final double vrf = -.30;
+        final double vlr = -.25;
+        final double vrr = .25;
+
+        robot.motorLF.setPower(vlf);
+        robot.motorRF.setPower(vrf);
+        robot.motorLR.setPower(vlr);
+        robot.motorRR.setPower(vrr);
+
+        getSensorData();
+
+        while (rangeDistance >16){
+
+            // continue strafing
+
+            telemetry.addData("vlf = ",vlf);
+            telemetry.addData("vrf = ",vrf);
+            telemetry.addData("vlr = ",vlr);
+            telemetry.addData("vrr = ",vrr);
+            telemetry.update();
+
+        }
+        motorsHalt();
+
+    }
+
     private void translateTime() {
         procedure = "translateTime";
         getSensorData();
 
         telemetry.addData("Retrieved Sensor Data = ", "True");
         telemetry.update();
-
-        sleep(1000);
 
         radians = heading * (Math.PI / 180);
         timeOutTime = runtime.time() + timeOut;
@@ -455,8 +509,6 @@ public class autoBlue_Test extends LinearOpMode {
 
         telemetry.addData("Set Power = ", "True");
         telemetry.update();
-
-        sleep(1000);
 
         while (opModeIsActive() && runtime.time() < timeOutTime) {
 
@@ -523,32 +575,31 @@ public class autoBlue_Test extends LinearOpMode {
      */
     private void pivot() {
         procedure = "Pivot";
-        initZ = robot.mrGyro.getIntegratedZValue();
+        currentZint = robot.mrGyro.getIntegratedZValue();
 
-        telemetry.addData("Gyro Value = ", initZ);
+        telemetry.addData("Heading = ", heading);
+        telemetry.addData("Gyro Value = ", currentZint);
         telemetry.update();
 
-        sleep(5000);
-
-        LR = -power;
-        LF = -power;
-        RR = power;
-        RF = power;
+        LR = power;
+        LF = power;
+        RR = -power;
+        RF = -power;
 
         setPower();
 
-        while (currentZint < heading && opModeIsActive()) {
+        while (currentZint > heading && opModeIsActive()) {
 
             getSensorData();
 
+            telemetry.addData("Heading = ", heading);
             telemetry.addData("currentZint Value = ", currentZint);
             telemetry.update();
 
-            logData();
-            idle();
+//            logData();
+//            idle();
         }
         motorsHalt();
-        sleep(5000);
     }
 
     /**
@@ -556,45 +607,82 @@ public class autoBlue_Test extends LinearOpMode {
      */
     private void translateDistance() {
         procedure = "translateDistance";
-        initZ = robot.mrGyro.getIntegratedZValue();
+//        initZ = robot.mrGyro.getIntegratedZValue();
+        double mmDistance = 0;
         myCurrentMotorPosition = robot.motorLF.getCurrentPosition();
-        private double mmDistance = distance * 10;
 
-        //  Need to determine COUNTS_PER_MM configuration
-        myTargetPosition = myCurrentMotorPosition + (mmDistance * COUNTS_PER_MM );
+        if (heading == 180) {
+            mmDistance = distance * -10;
+            //  Need to determine COUNTS_PER_MM configuration
+            myTargetPosition = myCurrentMotorPosition + (mmDistance * COUNTS_PER_MM );
 
-        getSensorData();
-
-        radians = heading * (Math.PI / 180);
-
-        while (opModeIsActive() && myTargetPosition > myCurrentMotorPosition) {
-            LF = calcLF();
-            RF = calcRF();
-            LR = calcLR();
-            RR = calcRR();
-
-            currentZint = robot.mrGyro.getIntegratedZValue();
-
-            if (currentZint != initZ) {  //Robot has drifted off course
-                zCorrection = Math.abs(initZ - currentZint);
-
-                courseCorrect();
-            } else {
-                zCorrection = 0;
-            }
-
-            setPower();
-
-            myCurrentMotorPosition = robot.motorLF.getCurrentPosition();
+            telemetry.addData("My Current position = ",myCurrentMotorPosition);
+            telemetry.addData("Target position = ",myTargetPosition);
+            telemetry.update();
 
             getSensorData();
 
-            telemetry();
-            logData();
+            radians = heading * (Math.PI / 180);
 
-            idle();
+            while (opModeIsActive() && myTargetPosition < myCurrentMotorPosition) {
+                LF = calcLF();
+                RF = calcRF();
+                LR = calcLR();
+                RR = calcRR();
+
+                setPower();
+
+                myCurrentMotorPosition = robot.motorLF.getCurrentPosition();
+
+                telemetry.addData("Current position = ",myCurrentMotorPosition);
+                telemetry.update();
+
+                getSensorData();
+
+//            telemetry();
+//            logData();
+
+//            idle();
+            }  // while
+        } else {
+            mmDistance = distance * 10;
+            //  Need to determine COUNTS_PER_MM configuration
+            myTargetPosition = myCurrentMotorPosition + (mmDistance * COUNTS_PER_MM );
+
+            telemetry.addData("My Current position = ",myCurrentMotorPosition);
+            telemetry.addData("Target position = ",myTargetPosition);
+            telemetry.update();
+
+            getSensorData();
+
+            radians = heading * (Math.PI / 180);
+
+            while (opModeIsActive() && myTargetPosition > myCurrentMotorPosition) {
+                LF = calcLF();
+                RF = calcRF();
+                LR = calcLR();
+                RR = calcRR();
+
+                setPower();
+
+                myCurrentMotorPosition = robot.motorLF.getCurrentPosition();
+
+                telemetry.addData("Current position = ",myCurrentMotorPosition);
+                telemetry.update();
+
+                getSensorData();
+
+//            telemetry();
+//            logData();
+
+//            idle();
+            }  // while
         }
+
+
         motorsHalt();               // shut down all of the motors before exiting function
+        telemetry.addData("Motors = ","HALTED");
+        telemetry.update();
     }
 
     /**
@@ -686,6 +774,7 @@ public class autoBlue_Test extends LinearOpMode {
         colorLeftBlue = robot.colorSensorLeft.blue();
 //        ods = robot.ods.getLightDetected();
         currentZint = robot.mrGyro.getIntegratedZValue();
+        rangeDistance = robot.rangeSensor.cmUltrasonic();
     }
 
     private void createDl() {

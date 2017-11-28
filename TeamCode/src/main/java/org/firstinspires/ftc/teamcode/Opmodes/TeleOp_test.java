@@ -33,6 +33,7 @@ THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 package org.firstinspires.ftc.teamcode.Opmodes;
 
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.teamcode.HardwareProfiles.HardwareTestPlatform;
 
@@ -70,6 +71,10 @@ public class TeleOp_test extends LinearOpMode {
          */
         robot.init(hardwareMap);
 
+        robot.servoStone.setPosition(.8);                        // move servoStone out of the way
+        robot.servoLeft.setPosition(1);                          // move servoLeft out of the way
+        robot.servoRight.setPosition(0);                         // move servoRight out of the way
+
         // Send telemetry message to signify robot waiting;
         telemetry.addData("Say", "Hello Driver");    //
         telemetry.update();
@@ -84,8 +89,8 @@ public class TeleOp_test extends LinearOpMode {
         while (opModeIsActive()) {
 
 
-            double speed = Math.hypot(gamepad1.left_stick_x, gamepad1.left_stick_y);
-            double robotAngle = Math.atan2((gamepad1.left_stick_y), (gamepad1.left_stick_x )) - Math.PI / 4;
+            double speed = Math.hypot(gamepad1.left_stick_x, gamepad1.left_stick_y *-1);
+            double robotAngle = Math.atan2((gamepad1.left_stick_y*-1), (gamepad1.left_stick_x )) - Math.PI / 4;
             double rightX = gamepad1.right_stick_x;
 
             telemetry.addData("Speed Value = ", speed);
@@ -94,8 +99,8 @@ public class TeleOp_test extends LinearOpMode {
 
             final double vlf = speed * Math.cos(robotAngle) + rightX;
             final double vrf = speed * Math.sin(robotAngle) - rightX;
-            final double vlr = speed * Math.sin(robotAngle) + rightX;
-            final double vrr = speed * Math.cos(robotAngle) - rightX;
+            final double vlr = (speed * Math.sin(robotAngle) + rightX)*.8;
+            final double vrr = (speed * Math.cos(robotAngle) - rightX)*.8;
 
             robot.motorLF.setPower(vlf);
             robot.motorRF.setPower(vrf);
@@ -103,28 +108,71 @@ public class TeleOp_test extends LinearOpMode {
             robot.motorRR.setPower(vrr);
 
             if (gamepad1.right_bumper) {
+                robot.servoBlockExit.setPosition(.5);
+            } else{
+                robot.servoBlockExit.setPosition(1);
+            }
+/**
+            if(gamepad2.right_trigger >0){
+                robot.motorRelicArm.setPower(gamepad2.right_trigger *.3);
+            }else if (gamepad2.left_trigger >0){
+                robot.motorRelicArm.setPower(gamepad2.left_trigger *-.5);
+            }else {
+                robot.motorRelicArm.setPower(0);
+            }
+**/
+
+            if (gamepad1.right_trigger >0) {
                 robot.servoLiftRight.setPosition(1);
                 robot.servoLiftLeft.setPosition(0);
-            }
+            }  // gamepad1.right_bumper
 
-            if (gamepad1.left_bumper) {
+            if (gamepad1.left_trigger >0) {
                 robot.servoLiftRight.setPosition(.75);
                 robot.servoLiftLeft.setPosition(.25);
+            }  // gamepad1.left_bumper
+
+            if (gamepad1.y){
+                robot.motorLinearSlide.setPower(.4);
+            } else if (gamepad1.a) {
+                robot.motorLinearSlide.setPower(-.4);
+
+            }else {
+                robot.motorLinearSlide.setPower(0);
             }
 
-            if (gamepad1.right_trigger > 0) {
-                robot.motorLift.setPower(.5);
+            if (gamepad2.dpad_down){
+                robot.servoRelicGrab.setPosition(.5);
+            } else if(gamepad2.dpad_up){
+                robot.servoRelicGrab.setPosition(0);
+            }
+
+            if (gamepad1.dpad_up) {
+                robot.motorLift.setPower(.3);
+            }
+            else if (gamepad1.dpad_down) {
+                robot.motorLift.setPower(-.1);
             }
             else {
                 robot.motorLift.setPower(0);
-            }
+            }  // gamepad2.left_trigger
 
-            if (gamepad1.left_trigger > 0) {
-                robot.motorLift.setPower(-.5);
-            }
-            else {
-                robot.motorLift.setPower(0);
-            }
+            if(gamepad2.a == true) {
+                robot.servoStone.setPosition(.71);
+                sleep(800);
+                robot.motorLF.setPower(.75);
+                robot.motorRF.setPower(.75);
+                robot.motorLR.setPower(.75);
+                robot.motorRR.setPower(.75);
+
+                sleep(300);
+
+                robot.servoStone.setPosition(.8);
+
+                sleep(700);
+
+                motorsHalt();
+            }  // if gamepad2.a
 
             telemetry.addData("vlf = ", vlf);
             telemetry.addData("vlr = ", vlr);
@@ -137,9 +185,9 @@ public class TeleOp_test extends LinearOpMode {
             telemetry.update();
 
             idle();
-            }
+            } // while opModeIsActive
 
-        }
+        } // runOpMode
 
     public void motorsHalt() {
         robot.motorLF.setPower(0);
