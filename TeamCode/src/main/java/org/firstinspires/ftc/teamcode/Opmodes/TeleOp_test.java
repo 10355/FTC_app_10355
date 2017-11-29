@@ -58,8 +58,13 @@ public class TeleOp_test extends LinearOpMode {
      * Instantiate all objects needed in this class
      */
     private final static HardwareTestPlatform robot = new HardwareTestPlatform();
-    double myCurrentLauncherPosition = 0;
-    int launcherEncoderStop = 0;
+    double currentLauncherPosition = 0;
+    double rangeDistance=0;
+    double targetLauncherPosition = 0;
+    double launchPosition = 0;
+    boolean relicSet = false;              // flag to identify if the relic arm has been deployed
+    boolean relicDeploy = false;             // flag to identify if the relic arm is deployed
+    boolean relicCaptured = false;          // flag to identify if the relic is captured
 
     @Override
     public void runOpMode() {
@@ -107,20 +112,45 @@ public class TeleOp_test extends LinearOpMode {
             robot.motorLR.setPower(vlr);
             robot.motorRR.setPower(vrr);
 
-            if (gamepad1.right_bumper) {
+            if (gamepad1.x) {
                 robot.servoBlockExit.setPosition(.5);
             } else{
                 robot.servoBlockExit.setPosition(1);
             }
-/**
-            if(gamepad2.right_trigger >0){
-                robot.motorRelicArm.setPower(gamepad2.right_trigger *.3);
-            }else if (gamepad2.left_trigger >0){
-                robot.motorRelicArm.setPower(gamepad2.left_trigger *-.5);
-            }else {
-                robot.motorRelicArm.setPower(0);
+
+            if (gamepad1.left_bumper){
+                rangeDistance = robot.rangeSensor.cmUltrasonic();
+                while (rangeDistance > 25){
+                    robot.motorLF.setPower(-1);
+                    robot.motorLR.setPower(-1);
+                    robot.motorRF.setPower(-1);
+                    robot.motorRR.setPower(-1);
+                }
+                motorsHalt();
             }
-**/
+
+            if (gamepad1.right_bumper){
+                rangeDistance = robot.rangeSensor.cmUltrasonic();
+                while (rangeDistance < 100){
+                    robot.motorLF.setPower(1);
+                    robot.motorLR.setPower(1);
+                    robot.motorRF.setPower(1);
+                    robot.motorRR.setPower(1);
+                }
+                motorsHalt();
+
+
+                if (gamepad1.left_bumper){
+                rangeDistance = robot.rangeSensor.cmUltrasonic();
+                while (rangeDistance > 20){
+                    robot.motorLF.setPower(1);
+                    robot.motorLR.setPower(1);
+                    robot.motorRF.setPower(1);
+                    robot.motorRR.setPower(1);
+                }
+                motorsHalt();
+
+            }
 
             if (gamepad1.right_trigger >0) {
                 robot.servoLiftRight.setPosition(1);
@@ -141,12 +171,6 @@ public class TeleOp_test extends LinearOpMode {
                 robot.motorLinearSlide.setPower(0);
             }
 
-            if (gamepad2.dpad_down){
-                robot.servoRelicGrab.setPosition(.5);
-            } else if(gamepad2.dpad_up){
-                robot.servoRelicGrab.setPosition(0);
-            }
-
             if (gamepad1.dpad_up) {
                 robot.motorLift.setPower(.3);
             }
@@ -156,6 +180,64 @@ public class TeleOp_test extends LinearOpMode {
             else {
                 robot.motorLift.setPower(0);
             }  // gamepad2.left_trigger
+
+            if(gamepad2.dpad_down){
+
+                if(!relicSet){
+                    relicSet = true;
+                    currentLauncherPosition = robot.motorRelicArm.getCurrentPosition();
+                    targetLauncherPosition = currentLauncherPosition + 500;
+
+                    // Lift relic grabber arm up to launching position
+                    robot.motorRelicArm.setPower(.2);
+
+                    while(currentLauncherPosition < targetLauncherPosition) {
+                        currentLauncherPosition = robot.motorRelicArm.getCurrentPosition();
+
+                    }
+                    robot.motorRelicArm.setPower(0);            // stop the robot relic arm
+                    // relic arm should be standing straight up
+
+                    launchPosition = robot.motorRelicArm.getCurrentPosition();
+
+                } else if (!relicCaptured){   // else if (!relicCaptured)
+                    relicCaptured = true;
+
+                    extendRelicArm();
+
+                    sleep(100);
+
+                    robot.servoRelicGrab.setPosition(.5);
+
+                    robot.motorRelicArm.setPower(-.1);
+
+                    sleep(2000);
+
+                    retractRelicArm();
+
+                } else if (relicCaptured) {   // else if (!relicCaptured)
+
+                    relicCaptured = false;
+                    extendRelicArm();
+
+                    sleep(100);
+
+                    robot.servoRelicGrab.setPosition(0);
+
+                    sleep(2000);
+
+                    retractRelicArm();
+
+                }
+
+            }else if(gamepad2.dpad_up){
+
+            }
+
+            if (gamepad1.y){
+                robot.servoRelicGrab.setPosition(0);
+
+            }
 
             if(gamepad2.a == true) {
                 robot.servoStone.setPosition(.71);
@@ -207,4 +289,56 @@ public class TeleOp_test extends LinearOpMode {
         telemetry.addData("Status", "Initialized");
         telemetry.update();
     }
+
+    private void extendRelicArm(){
+        currentLauncherPosition = robot.motorRelicArm.getCurrentPosition();
+        targetLauncherPosition = currentLauncherPosition + 500;
+
+        // Lift relic grabber arm up to launching position
+        robot.motorRelicArm.setPower(.2);
+
+        while(currentLauncherPosition < targetLauncherPosition) {
+            currentLauncherPosition = robot.motorRelicArm.getCurrentPosition();
+
+        }
+        robot.motorRelicArm.setPower(0);            // stop the robot relic arm
+        // relic arm should be standing straight up
+
+        launchPosition = robot.motorRelicArm.getCurrentPosition();
+
+        /***
+         * Control the speed tht the relic arm falls and capture the relic
+         */
+
+        robot.motorRelicArm.setPower(.3);
+        currentLauncherPosition = robot.motorRelicArm.getCurrentPosition();
+        targetLauncherPosition = currentLauncherPosition + 40;
+        while (targetLauncherPosition > currentLauncherPosition){
+            currentLauncherPosition = robot.motorRelicArm.getCurrentPosition();
+        }
+        robot.motorRelicArm.setPower(.1);
+
+        currentLauncherPosition = robot.motorRelicArm.getCurrentPosition();
+        targetLauncherPosition = currentLauncherPosition + 40;
+        while (targetLauncherPosition > currentLauncherPosition){
+            currentLauncherPosition = robot.motorRelicArm.getCurrentPosition();
+        }
+
+        robot.motorRelicArm.setPower(.1);
+
+    }
+
+    private void retractRelicArm() {
+        robot.motorRelicArm.setPower(-.3);
+
+        currentLauncherPosition = robot.motorRelicArm.getCurrentPosition();
+        while (launchPosition < currentLauncherPosition){
+            currentLauncherPosition = robot.motorRelicArm.getCurrentPosition();
+        }
+
+        robot.motorRelicArm.setPower(0);
+
+    }
+}
+
 }
