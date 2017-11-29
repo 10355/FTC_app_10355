@@ -57,7 +57,6 @@ import java.util.Locale;
  * Name the opMode and put it in the appropriate group
  */
 @Autonomous(name = "SETUP - Check Sensors", group = "SETUP")
-@Disabled
 
 /**
  * This opMode attempts to acquire and trigger the rightRed beacons.
@@ -80,6 +79,7 @@ public class AutoSetupSensor extends LinearOpMode {
     public double colorLeftBlue = 0;
     public double currentZint = 0;
     public double rangeDistance = 0;
+    public double currentLauncherPosition =0;
 
     private final static HardwareTestPlatform robot = new HardwareTestPlatform();
 
@@ -120,6 +120,7 @@ public class AutoSetupSensor extends LinearOpMode {
             telemetry.addData("colorLeftBlue = ", colorLeftBlue);
             telemetry.addData("colorRightRed = ", colorRightRed);
             telemetry.addData("colorRightBlue = ", colorRightBlue);
+            telemetry.addData("Current Launcher Position = ", currentLauncherPosition);
             telemetry.update();
 
 
@@ -139,6 +140,8 @@ public class AutoSetupSensor extends LinearOpMode {
         colorLeftBlue = robot.colorSensorLeft.blue();
         currentZint = robot.mrGyro.getIntegratedZValue();
         rangeDistance = robot.rangeSensor.cmUltrasonic();
+        currentLauncherPosition = robot.motorRelicArm.getCurrentPosition();
+
     }
 
 

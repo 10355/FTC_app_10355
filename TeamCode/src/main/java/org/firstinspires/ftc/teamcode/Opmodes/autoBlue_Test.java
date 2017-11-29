@@ -12,7 +12,7 @@ package org.firstinspires.ftc.teamcode.Opmodes;
         - Place glyph in the correct column
         - Park in the center position
 
-    Hardware Setup  (NEEDS TO BE UPDATED):
+    Hardware Setup:
         - 4 mecanum wheels with encoder on LF wheel - encoder utilized for measuring distance for fwd/rev drive operation
         - Arm Motor with encoder - controls mechanism for retrieving and placing glyphs
         - Arm motor with encoder - controls mechanism for retrieving and placing relics
@@ -24,11 +24,10 @@ package org.firstinspires.ftc.teamcode.Opmodes;
             - 1 for controlling balancing stone manipulation
         - Gyro sensor located at the center of the robot - utilized to compensate for drift
         - 2 x Color sensor (colorSensorLeft)- utilized to identify gem color
-        - 1 x Touch sensor - utilized to identify when robot touches wall with the front of the robot
         - 1 x Range Sensor - utilized to position distance from wall during autonomous mode
         - 1 x Motorola Camera - Utilized for decrypting the location of the glyph in autonomous mode
 
-    State Order (NEEDS TO BE UPDATED):
+    State Order:
         - ACQUIRECODE                   // Reads image to determine which column to place the glyph
         - REMOVEGEM                     // Determines which gem to remove and knocks it from the mount
         - RETRIEVEGLYPH2                // Goes to the center of the field and retrieves a second
@@ -51,7 +50,6 @@ import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.util.ElapsedTime;
-
 import org.firstinspires.ftc.robotcore.external.ClassFactory;
 import org.firstinspires.ftc.robotcore.external.matrices.OpenGLMatrix;
 import org.firstinspires.ftc.robotcore.external.navigation.RelicRecoveryVuMark;

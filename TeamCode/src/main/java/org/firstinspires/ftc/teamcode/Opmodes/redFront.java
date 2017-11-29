@@ -1,13 +1,13 @@
 package org.firstinspires.ftc.teamcode.Opmodes;
 
 /*
-    Program:    redBack.java
-    Opmode Name: Auto RED Back
+    Program:    redFront.java
+    Opmode Name: Auto RED Front
     Team:       10355 - Project Peacock
     Season:     2017-2018 => Relic Recovery
     Autonomous Program - Red Back Balancing Stone
     Alliance Color: Red
-    Robot Starting Position: Red balancing stone farthest from the relic mats
+    Robot Starting Position: Red balancing stone closest to the relic mats
     Strategy Description:
         - Read encrypto picture
         - remove blue gem
@@ -33,6 +33,7 @@ package org.firstinspires.ftc.teamcode.Opmodes;
         - VUMark                   // Reads image to determine which column to place the glyph
         - BALL                     // Determines which gem to remove and knocks it from the mount
         - CHECKVU                  // Check VUMark to determine which column to place the glyph in
+        - FIND_GLYPH_BOX           // exit balancing stone, turn towards glyph box and drive up to it.
         - LEFT                     // If Glyph goes in the left column
         - CENTER                   // If Glyph goes in the center column
         - RIGHT                    // If Glyph goes in the center column
@@ -64,9 +65,9 @@ import org.firstinspires.ftc.teamcode.Libs.DriveMecanum;
 /**
  * Name the opMode and put it in the appropriate group
  */
-@Autonomous(name = "Auto Red Back", group = "COMP")
+@Autonomous(name = "Auto Red Front", group = "COMP")
 
-public class redBack extends LinearOpMode {
+public class redFront extends LinearOpMode {
 
     /**
      * Instantiate all objects needed in this class
@@ -242,6 +243,23 @@ public class redBack extends LinearOpMode {
 
                     robot.servoLeft.setPosition(1);
 
+                    state = State.FIND_GLYPH_BOX;
+                    break;
+
+                case FIND_GLYPH_BOX:
+                    telemetry.addData("Action = ", "Drive forward off of balancing stone");
+                    telemetry.update();
+                    drive.translateTime(2, .2, 180);
+
+                    telemetry.addData("Action = ", "Rotate 90 degrees");
+                    telemetry.update();
+                    drive.pivotRight(.2, 90);
+
+                    telemetry.addData("VUMARK", String.valueOf(vuMarkValue));
+                    telemetry.addData("Action = ", "Drive forward");
+                    telemetry.update();
+                    drive.translateRange(.2, 180, 20);
+
                     state = State.CHECK_VU;
                     break;
 
@@ -301,10 +319,6 @@ public class redBack extends LinearOpMode {
                     break;
 
                 case CENTER:
-                    telemetry.addData("VUMARK", String.valueOf(vuMarkValue));
-                    telemetry.addData("Action = ", "Drive forward");
-                    telemetry.update();
-                    drive.translateRange(.2, 180, 20);
 
                     telemetry.addData("Range", String.valueOf(robot.rangeSensor.cmUltrasonic()));
                     telemetry.addData("Action = ", "strafe right #1");
@@ -341,10 +355,6 @@ public class redBack extends LinearOpMode {
                     break;
 
                 case LEFT:
-                    telemetry.addData("VUMARK", String.valueOf(vuMarkValue));
-                    telemetry.addData("Action = ", "Drive forward");
-                    telemetry.update();
-                    drive.translateRange(.2, 180, 20);
 
                     telemetry.addData("Range", String.valueOf(robot.rangeSensor.cmUltrasonic()));
                     telemetry.addData("Action = ", "strafe right #1");
@@ -445,7 +455,7 @@ public class redBack extends LinearOpMode {
      * Enumerate the States of the machine.
      */
     enum State {
-        HALT, VUMark, LEFT, CHECK_VU, CENTER, RIGHT, TEST, BALL
+        HALT, VUMark, LEFT, CHECK_VU, CENTER, RIGHT, TEST, BALL, FIND_GLYPH_BOX
     }
 
 }
