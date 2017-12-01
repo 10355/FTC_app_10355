@@ -40,7 +40,17 @@ public class HardwareTestPlatform {
     public Servo servoLiftRight;                   //Declare the servo
     public Servo servoLiftLeft;                   //Declare the servo
     public BNO055IMU imu = null;
-    public ModernRoboticsI2cRangeSensor rangeSensor;
+    public ModernRoboticsI2cRangeSensor rangeSensor = null;
+    public DcMotor motorShooter;
+    public DcMotor motorFeeder;
+    public Servo blockArmL;
+    public Servo blockArmR;
+    public DcMotor blockHolder;
+    public DcMotor linearSlide;
+    public DcMotor relicArm;
+    public Servo blockExit;
+    public Servo relicarm;
+
 
     //Wheel Setup
     static final double     COUNTS_PER_MOTOR_REV    = 1120 ;    // AndyMark 40
@@ -71,13 +81,13 @@ public class HardwareTestPlatform {
             mrGyro = (ModernRoboticsI2cGyro) sensorGyro;         //MR GyroNew
 
             //Define the color sensors
-            //I2cAddr i2CAddressColorRight = I2cAddr.create8bit(0x4c);
+            I2cAddr i2CAddressColorRight = I2cAddr.create8bit(0x4c);
             I2cAddr i2CAddressColorLeft = I2cAddr.create8bit(0x3c);
-            //colorSensorRight = hwMap.colorSensor.get("colorR"); //Map the sensor to the hardware
+            colorSensorRight = hwMap.colorSensor.get("colorR"); //Map the sensor to the hardware
             colorSensorLeft = hwMap.colorSensor.get("colorL"); //Map the sensor to the hardware
-            //colorSensorRight.setI2cAddress(i2CAddressColorRight);
+            colorSensorRight.setI2cAddress(i2CAddressColorRight);
             colorSensorLeft.setI2cAddress(i2CAddressColorLeft);
-            //colorSensorRight.enableLed(true);
+            colorSensorRight.enableLed(true);
             colorSensorLeft.enableLed(true);
 
             //Define the range sensor
@@ -109,23 +119,40 @@ public class HardwareTestPlatform {
             motorRR.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
             motorRR.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
-            motorLift = hwMap.dcMotor.get("lift");
-            motorLift.setDirection(DcMotor.Direction.FORWARD); // Set to REVERSE if using AndyMark motors
-            motorLift.setPower(0);
-            motorLift.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-            motorLift.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+            blockHolder = hwMap.dcMotor.get("blockHolder");
+            blockHolder.setDirection(DcMotor.Direction.FORWARD);
+            blockHolder.setPower(0);
+            blockHolder.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+            blockHolder.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
-            //motorLift = hwMap.dcMotor.get("lift");
-            //motorLift.setDirection(DcMotor.Direction.FORWARD); // Set to REVERSE if using AndyMark motors
-            //motorLift.setPower(0);
-            //motorLift.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-            //motorLift.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+            linearSlide = hwMap.dcMotor.get("linearSlide");
+            linearSlide.setDirection(DcMotor.Direction.FORWARD);
+            linearSlide.setPower(0);
+            linearSlide.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+            linearSlide.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+
+            relicArm = hwMap.dcMotor.get("relicArm");
+            relicArm.setDirection(DcMotor.Direction.FORWARD);
+            relicArm.setPower(0);
+            relicArm.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+            relicArm.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+
+
+
+
+
+
 
             //Setup the servos
             servoRight = hwMap.servo.get("servo0");
             servoLeft = hwMap.servo.get("servo1");
-            servoLiftRight = hwMap.servo.get("liftR");
-            servoLiftLeft = hwMap.servo.get("liftL");
+            blockArmL = hwMap.servo.get("blockL");
+            blockArmR = hwMap.servo.get("blockR");
+            blockExit = hwMap.servo.get("blockExit");
+            relicarm = hwMap.servo.get("relicarm");
+
+            //servoLiftRight = hwMap.servo.get("liftR");
+            //servoLiftLeft = hwMap.servo.get("liftL");
 
         }
     }
