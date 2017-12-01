@@ -239,6 +239,9 @@ public class TeleOp_test extends LinearOpMode {
 
             }
 
+
+            }
+
             if(gamepad2.a == true) {
                 robot.servoStone.setPosition(.71);
                 sleep(800);
@@ -269,7 +272,8 @@ public class TeleOp_test extends LinearOpMode {
             idle();
             } // while opModeIsActive
 
-        } // runOpMode
+        }
+
 
     public void motorsHalt() {
         robot.motorLF.setPower(0);
@@ -341,4 +345,4 @@ public class TeleOp_test extends LinearOpMode {
     }
 }
 
-}
+
