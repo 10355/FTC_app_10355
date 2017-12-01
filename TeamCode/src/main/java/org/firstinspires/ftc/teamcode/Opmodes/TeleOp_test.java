@@ -33,6 +33,7 @@ THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 package org.firstinspires.ftc.teamcode.Opmodes;
 
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.teamcode.HardwareProfiles.HardwareTestPlatform;
 
@@ -57,8 +58,13 @@ public class TeleOp_test extends LinearOpMode {
      * Instantiate all objects needed in this class
      */
     private final static HardwareTestPlatform robot = new HardwareTestPlatform();
-    double myCurrentLauncherPosition = 0;
-    int launcherEncoderStop = 0;
+    double currentLauncherPosition = 0;
+    double rangeDistance=0;
+    double targetLauncherPosition = 0;
+    double launchPosition = 0;
+    boolean relicSet = false;              // flag to identify if the relic arm has been deployed
+    boolean relicDeploy = false;             // flag to identify if the relic arm is deployed
+    boolean relicCaptured = false;          // flag to identify if the relic is captured
 
     @Override
     public void runOpMode() {
@@ -70,11 +76,17 @@ public class TeleOp_test extends LinearOpMode {
          */
         robot.init(hardwareMap);
 
+        robot.servoStone.setPosition(.8);                        // move servoStone out of the way
+        robot.servoLeft.setPosition(1);                          // move servoLeft out of the way
+        robot.servoRight.setPosition(0);                         // move servoRight out of the way
+
         // Send telemetry message to signify robot waiting;
         telemetry.addData("Say", "Hello Driver");    //
         telemetry.update();
 
         // Wait for the game to start (driver presses PLAY)
+        telemetry.addData("Waiting for Teleop to start.", "");    //
+        telemetry.update();
         waitForStart();
         telemetry.addData("Teleop Test Active", "");    //
         telemetry.update();
@@ -82,44 +94,172 @@ public class TeleOp_test extends LinearOpMode {
         while (opModeIsActive()) {
 
 
-            double speed = Math.hypot(gamepad1.left_stick_x, gamepad1.left_stick_y);
-            double robotAngle = Math.atan2((gamepad1.left_stick_y), (gamepad1.left_stick_x )) - Math.PI / 4;
+            double speed = Math.hypot(gamepad1.left_stick_x, gamepad1.left_stick_y *-1);
+            double robotAngle = Math.atan2((gamepad1.left_stick_y*-1), (gamepad1.left_stick_x )) - Math.PI / 4;
             double rightX = gamepad1.right_stick_x;
+
+            telemetry.addData("Speed Value = ", speed);
+            telemetry.addData("Robot Angle", robotAngle);
+            telemetry.addData("rightX", rightX);
+
             final double vlf = speed * Math.cos(robotAngle) + rightX;
             final double vrf = speed * Math.sin(robotAngle) - rightX;
-            final double vlr = speed * Math.sin(robotAngle) + rightX;
-            final double vrr = speed * Math.cos(robotAngle) - rightX;
+            final double vlr = (speed * Math.sin(robotAngle) + rightX)*.8;
+            final double vrr = (speed * Math.cos(robotAngle) - rightX)*.8;
 
             robot.motorLF.setPower(vlf);
             robot.motorRF.setPower(vrf);
             robot.motorLR.setPower(vlr);
             robot.motorRR.setPower(vrr);
 
+            if (gamepad1.x) {
+                robot.servoBlockExit.setPosition(.5);
+            } else{
+                robot.servoBlockExit.setPosition(1);
+            }
 
-            if (gamepad1.right_bumper) {
+            if (gamepad1.left_bumper){
+                rangeDistance = robot.rangeSensor.cmUltrasonic();
+                while (rangeDistance > 25){
+                    robot.motorLF.setPower(-1);
+                    robot.motorLR.setPower(-1);
+                    robot.motorRF.setPower(-1);
+                    robot.motorRR.setPower(-1);
+                }
+                motorsHalt();
+            }
+
+            if (gamepad1.right_bumper){
+                rangeDistance = robot.rangeSensor.cmUltrasonic();
+                while (rangeDistance < 100){
+                    robot.motorLF.setPower(1);
+                    robot.motorLR.setPower(1);
+                    robot.motorRF.setPower(1);
+                    robot.motorRR.setPower(1);
+                }
+                motorsHalt();
+
+
+                if (gamepad1.left_bumper){
+                rangeDistance = robot.rangeSensor.cmUltrasonic();
+                while (rangeDistance > 20){
+                    robot.motorLF.setPower(1);
+                    robot.motorLR.setPower(1);
+                    robot.motorRF.setPower(1);
+                    robot.motorRR.setPower(1);
+                }
+                motorsHalt();
+
+            }
+
+            if (gamepad1.right_trigger >0) {
                 robot.servoLiftRight.setPosition(1);
                 robot.servoLiftLeft.setPosition(0);
-            }
+            }  // gamepad1.right_bumper
 
-            if (gamepad1.left_bumper) {
+            if (gamepad1.left_trigger >0) {
                 robot.servoLiftRight.setPosition(.75);
                 robot.servoLiftLeft.setPosition(.25);
+            }  // gamepad1.left_bumper
+
+            if (gamepad1.y){
+                robot.motorLinearSlide.setPower(.4);
+            } else if (gamepad1.a) {
+                robot.motorLinearSlide.setPower(-.4);
+
+            }else {
+                robot.motorLinearSlide.setPower(0);
             }
 
-            if (gamepad1.right_trigger > 0) {
-                robot.motorLift.setPower(.5);
+            if (gamepad1.dpad_up) {
+                robot.motorLift.setPower(.3);
+            }
+            else if (gamepad1.dpad_down) {
+                robot.motorLift.setPower(-.1);
             }
             else {
                 robot.motorLift.setPower(0);
+            }  // gamepad2.left_trigger
+
+            if(gamepad2.dpad_down){
+
+                if(!relicSet){
+                    relicSet = true;
+                    currentLauncherPosition = robot.motorRelicArm.getCurrentPosition();
+                    targetLauncherPosition = currentLauncherPosition + 500;
+
+                    // Lift relic grabber arm up to launching position
+                    robot.motorRelicArm.setPower(.2);
+
+                    while(currentLauncherPosition < targetLauncherPosition) {
+                        currentLauncherPosition = robot.motorRelicArm.getCurrentPosition();
+
+                    }
+                    robot.motorRelicArm.setPower(0);            // stop the robot relic arm
+                    // relic arm should be standing straight up
+
+                    launchPosition = robot.motorRelicArm.getCurrentPosition();
+
+                } else if (!relicCaptured){   // else if (!relicCaptured)
+                    relicCaptured = true;
+
+                    extendRelicArm();
+
+                    sleep(100);
+
+                    robot.servoRelicGrab.setPosition(.5);
+
+                    robot.motorRelicArm.setPower(-.1);
+
+                    sleep(2000);
+
+                    retractRelicArm();
+
+                } else if (relicCaptured) {   // else if (!relicCaptured)
+
+                    relicCaptured = false;
+                    extendRelicArm();
+
+                    sleep(100);
+
+                    robot.servoRelicGrab.setPosition(0);
+
+                    sleep(2000);
+
+                    retractRelicArm();
+
+                }
+
+            }else if(gamepad2.dpad_up){
+
             }
 
-            if (gamepad1.left_trigger > 0) {
-                robot.motorLift.setPower(-.5);
-            }
-            else {
-                robot.motorLift.setPower(0);
+            if (gamepad1.y){
+                robot.servoRelicGrab.setPosition(0);
+
             }
 
+            if(gamepad2.a == true) {
+                robot.servoStone.setPosition(.71);
+                sleep(800);
+                robot.motorLF.setPower(.75);
+                robot.motorRF.setPower(.75);
+                robot.motorLR.setPower(.75);
+                robot.motorRR.setPower(.75);
+
+                sleep(300);
+
+                robot.servoStone.setPosition(.8);
+
+                sleep(700);
+
+                motorsHalt();
+            }  // if gamepad2.a
+
+            telemetry.addData("vlf = ", vlf);
+            telemetry.addData("vlr = ", vlr);
+            telemetry.addData("vrf = ", vrf);
+            telemetry.addData("vrr = ", vrr);
             telemetry.addData("left_stick_x", String.valueOf(gamepad1.left_stick_x));
             telemetry.addData("left_stick_y", String.valueOf(gamepad1.left_stick_y));
             telemetry.addData("right_stick_x", String.valueOf(gamepad1.right_stick_x));
@@ -127,9 +267,9 @@ public class TeleOp_test extends LinearOpMode {
             telemetry.update();
 
             idle();
-            }
+            } // while opModeIsActive
 
-        }
+        } // runOpMode
 
     public void motorsHalt() {
         robot.motorLF.setPower(0);
@@ -149,4 +289,56 @@ public class TeleOp_test extends LinearOpMode {
         telemetry.addData("Status", "Initialized");
         telemetry.update();
     }
+
+    private void extendRelicArm(){
+        currentLauncherPosition = robot.motorRelicArm.getCurrentPosition();
+        targetLauncherPosition = currentLauncherPosition + 500;
+
+        // Lift relic grabber arm up to launching position
+        robot.motorRelicArm.setPower(.2);
+
+        while(currentLauncherPosition < targetLauncherPosition) {
+            currentLauncherPosition = robot.motorRelicArm.getCurrentPosition();
+
+        }
+        robot.motorRelicArm.setPower(0);            // stop the robot relic arm
+        // relic arm should be standing straight up
+
+        launchPosition = robot.motorRelicArm.getCurrentPosition();
+
+        /***
+         * Control the speed tht the relic arm falls and capture the relic
+         */
+
+        robot.motorRelicArm.setPower(.3);
+        currentLauncherPosition = robot.motorRelicArm.getCurrentPosition();
+        targetLauncherPosition = currentLauncherPosition + 40;
+        while (targetLauncherPosition > currentLauncherPosition){
+            currentLauncherPosition = robot.motorRelicArm.getCurrentPosition();
+        }
+        robot.motorRelicArm.setPower(.1);
+
+        currentLauncherPosition = robot.motorRelicArm.getCurrentPosition();
+        targetLauncherPosition = currentLauncherPosition + 40;
+        while (targetLauncherPosition > currentLauncherPosition){
+            currentLauncherPosition = robot.motorRelicArm.getCurrentPosition();
+        }
+
+        robot.motorRelicArm.setPower(.1);
+
+    }
+
+    private void retractRelicArm() {
+        robot.motorRelicArm.setPower(-.3);
+
+        currentLauncherPosition = robot.motorRelicArm.getCurrentPosition();
+        while (launchPosition < currentLauncherPosition){
+            currentLauncherPosition = robot.motorRelicArm.getCurrentPosition();
+        }
+
+        robot.motorRelicArm.setPower(0);
+
+    }
+}
+
 }

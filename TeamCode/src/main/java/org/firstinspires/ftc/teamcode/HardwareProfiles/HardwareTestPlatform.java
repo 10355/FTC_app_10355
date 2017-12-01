@@ -5,6 +5,7 @@ import com.qualcomm.hardware.modernrobotics.ModernRoboticsI2cGyro;
 import com.qualcomm.hardware.modernrobotics.ModernRoboticsI2cRangeSensor;
 import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.GyroSensor;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.I2cAddr;
@@ -28,29 +29,24 @@ public class HardwareTestPlatform {
     public DcMotor motorRF = null;              //Declare the motor
     public DcMotor motorLR = null;              //Declare the motor
     public DcMotor motorRR = null;              //Declare the motor
-    public DcMotor motorLift = null;          //Declare the motor
+    public DcMotor motorLift = null;            //Declare the motor
+    public DcMotor motorRelicArm = null;        //Declare the motor
+    public DcMotor motorLinearSlide = null;     //Declare the motor
     public OpticalDistanceSensor ods;           //Declare the sensor
     public ColorSensor colorSensorRight;        //Declare the Color Sensor
-    public ColorSensor colorSensorLeft;        //Declare the Color Sensor
+    public ColorSensor colorSensorLeft;         //Declare the Color Sensor
     public TouchSensor touchSensor;             //Declare the Touch Sensor
     public GyroSensor sensorGyro;               //Declare the GyroNew sensor
     public ModernRoboticsI2cGyro mrGyro;        //Declare the MR GyroNew
-    public Servo servoRight;                   //Declare the servo
-    public Servo servoLeft;                   //Declare the servo
-    public Servo servoLiftRight;                   //Declare the servo
-    public Servo servoLiftLeft;                   //Declare the servo
+    public Servo servoRight;                    //Declare the servo
+    public Servo servoLeft;                     //Declare the servo
+    public Servo servoLiftRight;                //Declare the servo
+    public Servo servoLiftLeft;                 //Declare the servo
+    public Servo servoRelicGrab;                //Declare the servo
+    public Servo servoStone;                    //Declare the servo
+    public Servo servoBlockExit;                     //Declare the block exit servo
     public BNO055IMU imu = null;
-    public ModernRoboticsI2cRangeSensor rangeSensor = null;
-    public DcMotor motorShooter;
-    public DcMotor motorFeeder;
-    public Servo blockArmL;
-    public Servo blockArmR;
-    public DcMotor blockHolder;
-    public DcMotor linearSlide;
-    public DcMotor relicArm;
-    public Servo blockExit;
-    public Servo relicarm;
-
+    public ModernRoboticsI2cRangeSensor rangeSensor;
 
     //Wheel Setup
     static final double     COUNTS_PER_MOTOR_REV    = 1120 ;    // AndyMark 40
@@ -91,69 +87,68 @@ public class HardwareTestPlatform {
             colorSensorLeft.enableLed(true);
 
             //Define the range sensor
+            I2cAddr i2CAddressRangeLeft = I2cAddr.create8bit(0x28);
             rangeSensor = hwMap.get(ModernRoboticsI2cRangeSensor.class, "range");
-
+            rangeSensor.setI2cAddress(i2CAddressRangeLeft);
 
             //Setup the drive motors
             motorLF = hwMap.dcMotor.get("lf");
-            motorLF.setDirection(DcMotor.Direction.REVERSE); // Set to REVERSE if using AndyMark motors
+            motorLF.setDirection(DcMotor.Direction.FORWARD); // Set to REVERSE if using AndyMark motors
             motorLF.setPower(0);
             motorLF.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
             motorLF.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
             motorLR = hwMap.dcMotor.get("lr");
-            motorLR.setDirection(DcMotor.Direction.REVERSE); // Set to REVERSE if using AndyMark motors
+            motorLR.setDirection(DcMotor.Direction.FORWARD); // Set to REVERSE if using AndyMark motors
             motorLR.setPower(0);
             motorLR.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
             motorLR.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
             motorRF = hwMap.dcMotor.get("rf");
-            motorRF.setDirection(DcMotor.Direction.FORWARD); // Set to REVERSE if using AndyMark motors
+            motorRF.setDirection(DcMotor.Direction.REVERSE); // Set to REVERSE if using AndyMark motors
             motorRF.setPower(0);
             motorRF.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
             motorRF.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
             motorRR = hwMap.dcMotor.get("rr");
-            motorRR.setDirection(DcMotor.Direction.FORWARD); // Set to REVERSE if using AndyMark motors
+            motorRR.setDirection(DcMotor.Direction.REVERSE); // Set to REVERSE if using AndyMark motors
             motorRR.setPower(0);
             motorRR.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
             motorRR.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
-            blockHolder = hwMap.dcMotor.get("blockHolder");
-            blockHolder.setDirection(DcMotor.Direction.FORWARD);
-            blockHolder.setPower(0);
-            blockHolder.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-            blockHolder.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+            motorLift = hwMap.dcMotor.get("blockHolder");
+            motorLift.setDirection(DcMotor.Direction.FORWARD); // Set to REVERSE if using AndyMark motors
+            motorLift.setPower(0);
+            motorLift.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+            motorLift.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
-            linearSlide = hwMap.dcMotor.get("linearSlide");
-            linearSlide.setDirection(DcMotor.Direction.FORWARD);
-            linearSlide.setPower(0);
-            linearSlide.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-            linearSlide.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+            //motorLift = hwMap.dcMotor.get("lift");
+            //motorLift.setDirection(DcMotor.Direction.FORWARD); // Set to REVERSE if using AndyMark motors
+            //motorLift.setPower(0);
+            //motorLift.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+            //motorLift.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
-            relicArm = hwMap.dcMotor.get("relicArm");
-            relicArm.setDirection(DcMotor.Direction.FORWARD);
-            relicArm.setPower(0);
-            relicArm.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-            relicArm.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+            motorRelicArm = hwMap.dcMotor.get("relicArm");
+            motorRelicArm.setDirection(DcMotor.Direction.FORWARD);
+            motorRelicArm.setPower(0);
+            motorRelicArm.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+            motorRelicArm.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
-
-
-
-
-
+            motorLinearSlide = hwMap.dcMotor.get("linearSlide");
+            motorLinearSlide.setDirection(DcMotor.Direction.FORWARD);
+            motorLinearSlide.setPower(0);
+            motorLinearSlide.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+            motorLinearSlide.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
             //Setup the servos
-            servoRight = hwMap.servo.get("servo0");
-            servoLeft = hwMap.servo.get("servo1");
-            blockArmL = hwMap.servo.get("blockL");
-            blockArmR = hwMap.servo.get("blockR");
-            blockExit = hwMap.servo.get("blockExit");
-            relicarm = hwMap.servo.get("relicarm");
-
-            //servoLiftRight = hwMap.servo.get("liftR");
-            //servoLiftLeft = hwMap.servo.get("liftL");
-
+            servoRight = hwMap.servo.get("servo0");         // right gem arm
+            servoLeft = hwMap.servo.get("servo1");          // left gem arm
+            servoLiftRight = hwMap.servo.get("liftR");      // glyph grabber right
+            servoLiftLeft = hwMap.servo.get("liftL");       // glyph grabber left
+            servoRelicGrab = hwMap.servo.get("relicGrab");  // relic grabbing servo
+            servoStone = hwMap.servo.get("servoStone");     // stone placement servo
+            servoBlockExit = hwMap.servo.get("blockExit");  // glyph ejector servo
         }
     }
+
 }
