@@ -229,10 +229,17 @@ public class TeleOp_test extends LinearOpMode {
                 robot.servoRelicGrab.setPosition(0);
             }                   // if gamepad1.y
 
+<<<<<<< HEAD
             /**
              * Park the robot on the balancing stone
              */
             if(gamepad2.a == true) {            // if gamepad2.a
+=======
+
+            }
+
+            if(gamepad2.a == true) {
+>>>>>>> 5b775960f95e2f832b36deb80ad4d9596c3c7c26
                 robot.servoStone.setPosition(.71);
                 sleep(800);
                 robot.motorLF.setPower(.75);
@@ -262,7 +269,8 @@ public class TeleOp_test extends LinearOpMode {
             idle();
             } // while opModeIsActive
 
-        } // runOpMode
+        }
+
 
     public void motorsHalt() {              // public void motorsHalt
         robot.motorLF.setPower(0);
@@ -333,5 +341,12 @@ public class TeleOp_test extends LinearOpMode {
 
         robot.motorRelicArm.setPower(0);
 
+<<<<<<< HEAD
     }                       // private void retractRelicArm
 }
+=======
+    }
+}
+
+
+>>>>>>> 5b775960f95e2f832b36deb80ad4d9596c3c7c26
