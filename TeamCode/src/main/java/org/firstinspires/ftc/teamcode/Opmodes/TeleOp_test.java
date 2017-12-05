@@ -1,35 +1,33 @@
 /*
-Copyright (c) 2016 Robert Atkinson
+    Program:    TeleOp_Test.java
+    Opmode Name: TeleOp_Test
+    Team:       10355 - Project Peacock
+    Season:     2017-2018 => Relic Recovery
+    Autonomous Program - Teleop Mode
+    Alliance Color: N/A
+    Robot Starting Position: N/A
+    Strategy Description:
+        - Place Glyphs
+        - Retrieve and place relic
+        - Park on balancing stene
 
-All rights reserved.
+    Hardware Setup:
+        - 4 mecanum wheels with encoder on LF wheel - encoder utilized for measuring distance for fwd/rev drive operation
+        - Arm Motor with encoder - controls mechanism for retrieving and placing glyphs
+        - Arm motor with encoder - controls mechanism for retrieving and placing relics
+        - Servos
+            - 2 for controlling arms for removing gems
+            - 2 for controlling glyph retrieval
+            - 2 micro servos for controlling glyph manipulation wheels
+            - 1 for controlling relic retrieval system
+            - 1 for controlling balancing stone manipulation
+        - Gyro sensor located at the center of the robot - utilized to compensate for drift
+        - 2 x Color sensor (colorSensorLeft)- utilized to identify gem color
+        - 1 x Range Sensor - utilized to position distance from wall during autonomous mode
+        - 1 x Motorola Camera - Utilized for decrypting the location of the glyph in autonomous mode
 
-Redistribution and use in source and binary forms, with or without modification,
-are permitted (subject to the limitations in the disclaimer below) provided that
-the following conditions are met:
+ */
 
-Redistributions of source code must retain the above copyright notice, this list
-of conditions and the following disclaimer.
-
-Redistributions in binary form must reproduce the above copyright notice, this
-list of conditions and the following disclaimer in the documentation and/or
-other materials provided with the distribution.
-
-Neither the name of Robert Atkinson nor the names of his contributors may be used to
-endorse or promote products derived from this software without specific prior
-written permission.
-
-NO EXPRESS OR IMPLIED LICENSES TO ANY PARTY'S PATENT RIGHTS ARE GRANTED BY THIS
-LICENSE. THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
-"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO,
-THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESSFOR A PARTICULAR PURPOSE
-ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE
-FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
-DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
-SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
-CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR
-TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
-THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-*/
 package org.firstinspires.ftc.teamcode.Opmodes;
 
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
@@ -77,8 +75,9 @@ public class TeleOp_test extends LinearOpMode {
         robot.init(hardwareMap);
 
         robot.servoStone.setPosition(.8);                        // move servoStone out of the way
-        robot.servoLeft.setPosition(1);                          // move servoLeft out of the way
-        robot.servoRight.setPosition(0);                         // move servoRight out of the way
+        robot.servoLeft.setPosition(.9);                          // move servoLeft out of the way
+        robot.servoRight.setPosition(.1);                         // move servoRight out of the way
+        robot.servoRelicGrab.setPosition(0.1);
 
         // Send telemetry message to signify robot waiting;
         telemetry.addData("Say", "Hello Driver");    //
@@ -92,7 +91,6 @@ public class TeleOp_test extends LinearOpMode {
         telemetry.update();
         // run until the end of the match (driver presses STOP)
         while (opModeIsActive()) {
-
 
             double speed = Math.hypot(gamepad1.left_stick_x, gamepad1.left_stick_y *-1);
             double robotAngle = Math.atan2((gamepad1.left_stick_y*-1), (gamepad1.left_stick_x )) - Math.PI / 4;
@@ -112,45 +110,37 @@ public class TeleOp_test extends LinearOpMode {
             robot.motorLR.setPower(vlr);
             robot.motorRR.setPower(vrr);
 
-            if (gamepad1.x) {
+            if (gamepad1.x) {           // if gamepad1.x
                 robot.servoBlockExit.setPosition(.5);
             } else{
                 robot.servoBlockExit.setPosition(1);
-            }
+            }           // if gamepad1.x
 
-            if (gamepad1.left_bumper){
+/*
+            if (gamepad1.left_bumper){      // if gamepad1.left_bumper
                 rangeDistance = robot.rangeSensor.cmUltrasonic();
-                while (rangeDistance > 25){
+                while (rangeDistance > 50){         // while rangeDistance
                     robot.motorLF.setPower(-1);
                     robot.motorLR.setPower(-1);
                     robot.motorRF.setPower(-1);
                     robot.motorRR.setPower(-1);
-                }
+                    rangeDistance = robot.rangeSensor.cmUltrasonic();
+                }               // while rangeDistance
                 motorsHalt();
-            }
+            }           // if gamepad1.left_bumper
 
-            if (gamepad1.right_bumper){
+            if (gamepad1.right_bumper) {     // if gamepad1.right_bumper
                 rangeDistance = robot.rangeSensor.cmUltrasonic();
-                while (rangeDistance < 100){
+                while (rangeDistance < 100) {       // while rangeDistance
                     robot.motorLF.setPower(1);
                     robot.motorLR.setPower(1);
                     robot.motorRF.setPower(1);
                     robot.motorRR.setPower(1);
-                }
+                    rangeDistance = robot.rangeSensor.cmUltrasonic();
+                }                   // while rangeDistance
                 motorsHalt();
-
-
-                if (gamepad1.left_bumper){
-                rangeDistance = robot.rangeSensor.cmUltrasonic();
-                while (rangeDistance > 20){
-                    robot.motorLF.setPower(1);
-                    robot.motorLR.setPower(1);
-                    robot.motorRF.setPower(1);
-                    robot.motorRR.setPower(1);
-                }
-                motorsHalt();
-
-            }
+            }               // if gamepad1.right_bumper
+*/
 
             if (gamepad1.right_trigger >0) {
                 robot.servoLiftRight.setPosition(1);
@@ -162,28 +152,27 @@ public class TeleOp_test extends LinearOpMode {
                 robot.servoLiftLeft.setPosition(.25);
             }  // gamepad1.left_bumper
 
-            if (gamepad1.y){
+            if (gamepad1.y){            // if gamepad1.y
                 robot.motorLinearSlide.setPower(.4);
             } else if (gamepad1.a) {
                 robot.motorLinearSlide.setPower(-.4);
-
             }else {
                 robot.motorLinearSlide.setPower(0);
-            }
+            }               // if gamepad1.y
 
-            if (gamepad1.dpad_up) {
+            if (gamepad1.dpad_up) {         // if gamepad1.dpad_up
                 robot.motorLift.setPower(.3);
-            }
-            else if (gamepad1.dpad_down) {
+            } else if (gamepad1.dpad_down) {
                 robot.motorLift.setPower(-.1);
-            }
-            else {
+            } else {
                 robot.motorLift.setPower(0);
-            }  // gamepad2.left_trigger
+            }  // if gamepad1.dpad_up
 
-            if(gamepad2.dpad_down){
-
-                if(!relicSet){
+            if(gamepad2.dpad_down){     // if gamepad2.dpad_down
+                /**
+                 * Check to see if the relic arm is in the upright position => relicSet=true
+                  */
+                if(!relicSet){          // if !relicSet
                     relicSet = true;
                     currentLauncherPosition = robot.motorRelicArm.getCurrentPosition();
                     targetLauncherPosition = currentLauncherPosition + 500;
@@ -203,15 +192,13 @@ public class TeleOp_test extends LinearOpMode {
                 } else if (!relicCaptured){   // else if (!relicCaptured)
                     relicCaptured = true;
 
-                    extendRelicArm();
-
-                    sleep(100);
-
                     robot.servoRelicGrab.setPosition(.5);
 
-                    robot.motorRelicArm.setPower(-.1);
+                    extendRelicArm();
 
-                    sleep(2000);
+                    robot.servoRelicGrab.setPosition(.8);
+
+                    sleep(400);
 
                     retractRelicArm();
 
@@ -228,18 +215,24 @@ public class TeleOp_test extends LinearOpMode {
 
                     retractRelicArm();
 
-                }
+                }                   // if !relicSet
 
             }else if(gamepad2.dpad_up){
 
-            }
+            }           // if gamepad2.dpad_down
 
-            if (gamepad1.y){
+            /**
+             * Reset the relic grabbing servo
+             */
+
+            if (gamepad2.y){            // if gamepad1.y
                 robot.servoRelicGrab.setPosition(0);
+            }                   // if gamepad1.y
 
-            }
-
-            if(gamepad2.a == true) {
+            /**
+             * Park the robot on the balancing stone
+             */
+            if(gamepad2.a == true) {            // if gamepad2.a
                 robot.servoStone.setPosition(.71);
                 sleep(800);
                 robot.motorLF.setPower(.75);
@@ -249,7 +242,7 @@ public class TeleOp_test extends LinearOpMode {
 
                 sleep(300);
 
-                robot.servoStone.setPosition(.8);
+                robot.servoStone.setPosition(.2);
 
                 sleep(700);
 
@@ -271,14 +264,14 @@ public class TeleOp_test extends LinearOpMode {
 
         } // runOpMode
 
-    public void motorsHalt() {
+    public void motorsHalt() {              // public void motorsHalt
         robot.motorLF.setPower(0);
         robot.motorRF.setPower(0);
         robot.motorLR.setPower(0);
         robot.motorRR.setPower(0);
-    }
+    }                   // public void motorsHalt
 
-    private void begin() {
+    private void begin() {                  // private void begin
 
         /**
          * Inititialize the robot's hardware.  The hardware configuration can be found in the
@@ -288,11 +281,11 @@ public class TeleOp_test extends LinearOpMode {
 
         telemetry.addData("Status", "Initialized");
         telemetry.update();
-    }
+    }               // private void begin
 
-    private void extendRelicArm(){
+    private void extendRelicArm(){              //private void extendRelicArm
         currentLauncherPosition = robot.motorRelicArm.getCurrentPosition();
-        targetLauncherPosition = currentLauncherPosition + 500;
+        targetLauncherPosition = currentLauncherPosition + 200;
 
         // Lift relic grabber arm up to launching position
         robot.motorRelicArm.setPower(.2);
@@ -310,13 +303,13 @@ public class TeleOp_test extends LinearOpMode {
          * Control the speed tht the relic arm falls and capture the relic
          */
 
-        robot.motorRelicArm.setPower(.3);
+        robot.motorRelicArm.setPower(.35);
         currentLauncherPosition = robot.motorRelicArm.getCurrentPosition();
         targetLauncherPosition = currentLauncherPosition + 40;
         while (targetLauncherPosition > currentLauncherPosition){
             currentLauncherPosition = robot.motorRelicArm.getCurrentPosition();
         }
-        robot.motorRelicArm.setPower(.1);
+        robot.motorRelicArm.setPower(-0.15);
 
         currentLauncherPosition = robot.motorRelicArm.getCurrentPosition();
         targetLauncherPosition = currentLauncherPosition + 40;
@@ -324,21 +317,21 @@ public class TeleOp_test extends LinearOpMode {
             currentLauncherPosition = robot.motorRelicArm.getCurrentPosition();
         }
 
-        robot.motorRelicArm.setPower(.1);
+        robot.motorRelicArm.setPower(-.05);
 
-    }
+    }           //private void extendRelicArm
 
-    private void retractRelicArm() {
-        robot.motorRelicArm.setPower(-.3);
+    private void retractRelicArm() {                // private void retractRelicArm
+        robot.motorRelicArm.setPower(-.5);
 
         currentLauncherPosition = robot.motorRelicArm.getCurrentPosition();
+        robot.motorRelicArm.setPower(-.1);
+
         while (launchPosition < currentLauncherPosition){
             currentLauncherPosition = robot.motorRelicArm.getCurrentPosition();
         }
 
         robot.motorRelicArm.setPower(0);
 
-    }
-}
-
+    }                       // private void retractRelicArm
 }

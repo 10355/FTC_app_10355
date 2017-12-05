@@ -122,12 +122,6 @@ public class HardwareTestPlatform {
             motorLift.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
             motorLift.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
-            //motorLift = hwMap.dcMotor.get("lift");
-            //motorLift.setDirection(DcMotor.Direction.FORWARD); // Set to REVERSE if using AndyMark motors
-            //motorLift.setPower(0);
-            //motorLift.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-            //motorLift.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-
             motorRelicArm = hwMap.dcMotor.get("relicArm");
             motorRelicArm.setDirection(DcMotor.Direction.FORWARD);
             motorRelicArm.setPower(0);

@@ -148,10 +148,10 @@ public class blueFront extends LinearOpMode {
          * Deploy the color sensor
          */
 
-        robot.servoLeft.setPosition(1);
-        robot.servoRight.setPosition(0);
+        robot.servoLeft.setPosition(.9);
+        robot.servoRight.setPosition(.05);
 
-        sleep(1000);
+//        sleep(1000);
 
         telemetry.addData("Color Sensor Red = ", robot.colorSensorRight.red());
         telemetry.addData("Color Sensor Blue = ", robot.colorSensorRight.blue());
@@ -226,19 +226,19 @@ public class blueFront extends LinearOpMode {
                     telemetry.addData("VUMARK", String.valueOf(vuMarkValue));
                     telemetry.update();
 
-                    robot.servoRight.setPosition(.5);
+                    robot.servoRight.setPosition(.7);
                     telemetry.addData("VUMARK", String.valueOf(vuMarkValue));
                     telemetry.addData("SERVO position", robot.servoLeft.getPosition());
                     telemetry.update();
                     sleep(1000);
-                    if (robot.colorSensorLeft.blue() > robot.colorSensorLeft.red()) {  //Blue is back
+                    if (robot.colorSensorRight.blue() > robot.colorSensorRight.red()) {  //Blue is back
                         drive.translateTime(.8, .2, 180);
                     }
                     else {
                         drive.translateTime(.8, .2, 0);
                     }
 
-                    robot.servoRight.setPosition(0);
+                    robot.servoRight.setPosition(.1);
 
                     state = State.FIND_GLYPH_BOX;             //temporary code to bypass vuforia
                     break;
