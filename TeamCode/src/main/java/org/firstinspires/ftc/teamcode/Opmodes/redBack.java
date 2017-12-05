@@ -77,7 +77,7 @@ public class redBack extends LinearOpMode {
     private LinearOpMode opMode = this;                     //Opmode
     private DataLogger Dl;                                  //Datalogger object
     private String alliance = "red";                       //Your current alliance
-    private State state = State.VUMark;                     //Machine State
+    private State state = State.BALL;                     //Machine State
 
     /**
      * {@link #vuforia} is the variable we will use to store our instance of the Vuforia
@@ -141,16 +141,8 @@ public class redBack extends LinearOpMode {
 
         DriveMecanum drive = new DriveMecanum(robot, opMode, Dl);
 
-        robot.servoRight.setPosition(0);
-        robot.servoLeft.setPosition(1);
-//        robot.servoLinear.setPosition(.2);
-
-
-        /**
-         * Deploy the color sensor
-         */
-
-        sleep(1000);
+        robot.servoRight.setPosition(0.05);
+        robot.servoLeft.setPosition(0.9);
 
         telemetry.addData("Status", "Initialized");
         telemetry.addData(">", "Press Play to start tracking");
@@ -219,8 +211,19 @@ public class redBack extends LinearOpMode {
                         telemetry.addData("vuMarkValue ", vuMarkValue);
                         telemetry.update();
                         sleep(1000);
-                        state = State.BALL;  //The vuMark was found so move on to the next state
+                        state = State.CHECK_VU;  //The vuMark was found so move on to the next state
                     }
+
+                    break;
+
+                case GETTOVU:
+                    telemetry.addData("VUMARK", String.valueOf(vuMarkValue));
+                    telemetry.addData("Action = ", "Drive forward");
+                    telemetry.update();
+                    drive.translateRange(.2, 180, 80);  //distance the robot
+                                            // needs to be from the glyph wall to capture the vu
+
+                    state = State.VUMark;  //The vuMark was found so move on to the next state
 
                     break;
 
@@ -228,21 +231,25 @@ public class redBack extends LinearOpMode {
                     telemetry.addData("VUMARK", String.valueOf(vuMarkValue));
                     telemetry.update();
 
-                    robot.servoLeft.setPosition(.5);
+                    robot.servoLeft.setPosition(.3);
                     telemetry.addData("VUMARK", String.valueOf(vuMarkValue));
                     telemetry.addData("SERVO position", robot.servoRight.getPosition());
                     telemetry.update();
-                    sleep(5000);
-                    if (robot.colorSensorRight.blue() > robot.colorSensorRight.red()) {  //Blue is back
-                        drive.translateTime(.5, .2, 180);
+                    sleep(2000);
+                    if (robot.colorSensorLeft.blue() > robot.colorSensorLeft.red()) {  //Blue is back
+                        telemetry.addData("Ball Color = ", "blue");
+                        telemetry.update();
+                        drive.translateTime(.75, .2, 0);
                     }
                     else {
-                        drive.translateTime(.5, .2, 0);
+                        telemetry.addData("Ball Color = ", "red");
+                        telemetry.update();
+                        drive.translateTime(.8, .2, 180);
                     }
 
-                    robot.servoLeft.setPosition(1);
+                    robot.servoLeft.setPosition(.9);
 
-                    state = State.CHECK_VU;
+                    state = State.VUMark;
                     break;
 
                 case CHECK_VU:
@@ -280,8 +287,8 @@ public class redBack extends LinearOpMode {
 
                     telemetry.addData("Action = ", "Kick block");
                     telemetry.update();
-                    sleep(100);
                     robot.servoBlockExit.setPosition(.5);
+                    sleep(100);
 
                     telemetry.addData("Action = ", "drive backward");
                     telemetry.update();
@@ -316,12 +323,12 @@ public class redBack extends LinearOpMode {
                     telemetry.addData("Action = ", "strafe right #2");
                     telemetry.update();
                     sleep(100);
-                    drive.translateTime(2.5, .2, 90);
+                    drive.translateTime(1.9, .2, 90);
 
                     telemetry.addData("Action = ", "Kick block");
                     telemetry.update();
-                    sleep(100);
                     robot.servoBlockExit.setPosition(.5);
+                    sleep(100);
 
                     telemetry.addData("Action = ", "drive backward");
                     telemetry.update();
@@ -356,7 +363,7 @@ public class redBack extends LinearOpMode {
                     telemetry.addData("Action = ", "strafe right #2");
                     telemetry.update();
                     sleep(100);
-                    drive.translateTime(5.5, .2, 90);
+                    drive.translateTime(3.9, .2, 90);
 
                     telemetry.addData("Action = ", "Kick block");
                     telemetry.update();
@@ -369,8 +376,8 @@ public class redBack extends LinearOpMode {
 
                     telemetry.addData("Action = ", "drive forward");
                     telemetry.update();
-                    sleep(500);
                     drive.translateTime(1, .2, 180);
+                    sleep(500);
 
                     telemetry.addData("Action = ", "drive backward & Halt");
                     telemetry.update();
@@ -445,7 +452,7 @@ public class redBack extends LinearOpMode {
      * Enumerate the States of the machine.
      */
     enum State {
-        HALT, VUMark, LEFT, CHECK_VU, CENTER, RIGHT, TEST, BALL
+        HALT, VUMark, LEFT, CHECK_VU, CENTER, RIGHT, TEST, BALL, GETTOVU
     }
 
 }

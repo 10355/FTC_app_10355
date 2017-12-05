@@ -142,16 +142,8 @@ public class redFront extends LinearOpMode {
 
         DriveMecanum drive = new DriveMecanum(robot, opMode, Dl);
 
-        robot.servoRight.setPosition(0);
-        robot.servoLeft.setPosition(1);
-//        robot.servoLinear.setPosition(.2);
-
-
-        /**
-         * Deploy the color sensor
-         */
-
-        sleep(1000);
+        robot.servoRight.setPosition(0.05);
+        robot.servoLeft.setPosition(0.9);
 
         telemetry.addData("Status", "Initialized");
         telemetry.addData(">", "Press Play to start tracking");
@@ -229,19 +221,23 @@ public class redFront extends LinearOpMode {
                     telemetry.addData("VUMARK", String.valueOf(vuMarkValue));
                     telemetry.update();
 
-                    robot.servoLeft.setPosition(.5);
+                    robot.servoLeft.setPosition(.3);
                     telemetry.addData("VUMARK", String.valueOf(vuMarkValue));
                     telemetry.addData("SERVO position", robot.servoRight.getPosition());
                     telemetry.update();
-                    sleep(5000);
-                    if (robot.colorSensorRight.blue() > robot.colorSensorRight.red()) {  //Blue is back
-                        drive.translateTime(.5, .2, 180);
+                    sleep(2000);
+                    if (robot.colorSensorLeft.blue() > robot.colorSensorLeft.red()) {  //Blue is back
+                        telemetry.addData("Ball Color = ", "blue");
+                        telemetry.update();
+                        drive.translateTime(.75, .2, 0);
                     }
                     else {
-                        drive.translateTime(.5, .2, 0);
+                        telemetry.addData("Ball Color = ", "red");
+                        telemetry.update();
+                        drive.translateTime(.8, .2, 180);
                     }
 
-                    robot.servoLeft.setPosition(1);
+                    robot.servoLeft.setPosition(.9);
 
                     state = State.FIND_GLYPH_BOX;
                     break;
@@ -298,8 +294,8 @@ public class redFront extends LinearOpMode {
 
                     telemetry.addData("Action = ", "Kick block");
                     telemetry.update();
-                    sleep(100);
                     robot.servoBlockExit.setPosition(.5);
+                    sleep(100);
 
                     telemetry.addData("Action = ", "drive backward");
                     telemetry.update();
@@ -334,8 +330,8 @@ public class redFront extends LinearOpMode {
 
                     telemetry.addData("Action = ", "Kick block");
                     telemetry.update();
-                    sleep(100);
                     robot.servoBlockExit.setPosition(.5);
+                    sleep(100);
 
                     telemetry.addData("Action = ", "drive backward");
                     telemetry.update();
@@ -370,8 +366,8 @@ public class redFront extends LinearOpMode {
 
                     telemetry.addData("Action = ", "Kick block");
                     telemetry.update();
-                    sleep(100);
                     robot.servoBlockExit.setPosition(.5);
+                    sleep(100);
 
                     drive.translateTime(.75, .2, 0);
                     telemetry.addData("Action = ", "drive backward");
