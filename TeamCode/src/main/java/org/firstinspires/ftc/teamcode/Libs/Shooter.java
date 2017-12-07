@@ -9,7 +9,7 @@ import org.firstinspires.ftc.teamcode.HardwareProfiles.HardwareTestPlatform;
  * Created by caseyzandbergen on 12/1/16.
  */
 
-public class Shooter {
+/*public class Shooter {
     private HardwareTestPlatform robot = null;
     private LinearOpMode opMode = null;
     private boolean shooterLimit;
@@ -25,19 +25,19 @@ public class Shooter {
     public int initShooter() {
         int target;
         while (!robot.touchSensor.isPressed()) {
-            robot.motorShooter.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-            robot.motorShooter.setPower(.2);
-            shooterEncoderPosition = robot.motorShooter.getCurrentPosition();
+            //robot.motorShooter.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+            //robot.motorShooter.setPower(.2);
+           // shooterEncoderPosition = robot.motorShooter.getCurrentPosition();
 
             opMode.telemetry.addData("Limit Switch", String.valueOf(robot.touchSensor.isPressed()));
             opMode.telemetry.addData("ShooterEncoderPosition", String.valueOf(shooterEncoderPosition));
             opMode.telemetry.update();
         }
-        target = robot.motorShooter.getCurrentPosition();
+      //  target = robot.motorShooter.getCurrentPosition();
         while (shooterEncoderPosition > 0) {
-            robot.motorShooter.setTargetPosition(0);
-            robot.motorShooter.setPower(-.2);
-            shooterEncoderPosition = robot.motorShooter.getCurrentPosition();
+         //   robot.motorShooter.setTargetPosition(0);
+         //   robot.motorShooter.setPower(-.2);
+          //  shooterEncoderPosition = robot.motorShooter.getCurrentPosition();
 
             opMode.telemetry.addData("Limit Switch", String.valueOf(robot.touchSensor.isPressed()));
             opMode.telemetry.addData("ShooterEncoderPosition", String.valueOf(shooterEncoderPosition));
@@ -75,4 +75,4 @@ public class Shooter {
     public void feedStop() {
         robot.motorFeeder.setPower(0);
     }
-}
+}*/

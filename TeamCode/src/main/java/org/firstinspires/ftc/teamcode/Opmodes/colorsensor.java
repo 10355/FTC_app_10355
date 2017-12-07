@@ -41,11 +41,11 @@ public class colorsensor extends LinearOpMode  {
             switch (state) {
                 case DRIVE:
 
-                    robot.blockHolder.setPower(1);
+                    //robot.blockHolder.setPower(1);
 
                     sleep(500);
 
-                    robot.blockHolder.setPower(0);
+                  //  robot.blockHolder.setPower(0);
 
 
 

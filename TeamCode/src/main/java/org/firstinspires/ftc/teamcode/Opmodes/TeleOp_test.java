@@ -110,7 +110,7 @@ public class TeleOp_test extends LinearOpMode {
             robot.motorLR.setPower(vlr);
             robot.motorRR.setPower(vrr);
 
-            if (gamepad1.x) {           // if gamepad1.x
+            if (gamepad2.x) {           // if gamepad1.x
                 robot.servoBlockExit.setPosition(.5);
             } else{
                 robot.servoBlockExit.setPosition(1);
@@ -142,37 +142,37 @@ public class TeleOp_test extends LinearOpMode {
             }               // if gamepad1.right_bumper
 */
 
-            if (gamepad1.right_trigger >0) {
+            if (gamepad2.right_trigger >0) {
                 robot.servoLiftRight.setPosition(1);
                 robot.servoLiftLeft.setPosition(0);
             }  // gamepad1.right_bumper
 
-            if (gamepad1.left_trigger >0) {
+            if (gamepad2.left_trigger >0) {
                 robot.servoLiftRight.setPosition(.75);
                 robot.servoLiftLeft.setPosition(.25);
             }  // gamepad1.left_bumper
 
-            if (gamepad1.y){            // if gamepad1.y
+            if (gamepad2.y){            // if gamepad1.y
                 robot.motorLinearSlide.setPower(.4);
-            } else if (gamepad1.a) {
+            } else if (gamepad2.a) {
                 robot.motorLinearSlide.setPower(-.4);
             }else {
                 robot.motorLinearSlide.setPower(0);
             }               // if gamepad1.y
 
-            if (gamepad1.dpad_up) {         // if gamepad1.dpad_up
+            if (gamepad2.dpad_up) {         // if gamepad1.dpad_up
                 robot.motorLift.setPower(.3);
-            } else if (gamepad1.dpad_down) {
+            } else if (gamepad2.dpad_down) {
                 robot.motorLift.setPower(-.1);
             } else {
                 robot.motorLift.setPower(0);
             }  // if gamepad1.dpad_up
 
-            if(gamepad2.dpad_down){     // if gamepad2.dpad_down
+           //if(gamepad1.dpad_down){     // if gamepad2.dpad_down
                 /**
                  * Check to see if the relic arm is in the upright position => relicSet=true
                   */
-                if(!relicSet){          // if !relicSet
+                /*if(!relicSet){          // if !relicSet
                     relicSet = true;
                     currentLauncherPosition = robot.motorRelicArm.getCurrentPosition();
                     targetLauncherPosition = currentLauncherPosition + 500;
@@ -217,9 +217,10 @@ public class TeleOp_test extends LinearOpMode {
 
                 }                   // if !relicSet
 
-            }else if(gamepad2.dpad_up){
+            }else if(gamepad1.dpad_up){
 
             }           // if gamepad2.dpad_down
+            */
 
             /**
              * Reset the relic grabbing servo
@@ -229,17 +230,15 @@ public class TeleOp_test extends LinearOpMode {
                 robot.servoRelicGrab.setPosition(0);
             }                   // if gamepad1.y
 
-<<<<<<< HEAD
+
             /**
              * Park the robot on the balancing stone
              */
             if(gamepad2.a == true) {            // if gamepad2.a
-=======
 
             }
 
             if(gamepad2.a == true) {
->>>>>>> 5b775960f95e2f832b36deb80ad4d9596c3c7c26
                 robot.servoStone.setPosition(.71);
                 sleep(800);
                 robot.motorLF.setPower(.75);
@@ -340,13 +339,5 @@ public class TeleOp_test extends LinearOpMode {
         }
 
         robot.motorRelicArm.setPower(0);
-
-<<<<<<< HEAD
     }                       // private void retractRelicArm
 }
-=======
-    }
-}
-
-
->>>>>>> 5b775960f95e2f832b36deb80ad4d9596c3c7c26
