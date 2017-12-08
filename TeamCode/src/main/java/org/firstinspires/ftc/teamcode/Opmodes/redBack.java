@@ -164,16 +164,19 @@ public class redBack extends LinearOpMode {
 
             switch (state) {
                 case TEST:
-                    drive.translateTime(10, .2, 90);
+                    drive.translateTime(2, .2, 180);
                     telemetry.addData("Range", String.valueOf(robot.rangeSensor.cmUltrasonic()));
                     telemetry.addData("Action = ", "strafe right #1");
                     telemetry.update();
                     sleep(1000);
 
-                    state = State.HALT;
+                    state = State.VUMark;
                     break;
 
                 case VUMark:
+
+                    drive.translateTime(2, .2, 180);
+
                     RelicRecoveryVuMark vuMark = RelicRecoveryVuMark.from(relicTemplate);
 
                     if (count == 1) {  //Only do this the first time
@@ -211,6 +214,7 @@ public class redBack extends LinearOpMode {
                         telemetry.addData("vuMarkValue ", vuMarkValue);
                         telemetry.update();
                         sleep(1000);
+
                         state = State.CHECK_VU;  //The vuMark was found so move on to the next state
                     }
 

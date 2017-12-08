@@ -154,9 +154,15 @@ public class TeleOp_test extends LinearOpMode {
 
             if (gamepad2.y){            // if gamepad1.y
                 robot.motorLinearSlide.setPower(.4);
-            } else if (gamepad2.a) {
+            }
+            else {
+                robot.motorLinearSlide.setPower(0);
+            }
+
+            if (gamepad2.a) {
                 robot.motorLinearSlide.setPower(-.4);
-            }else {
+            }
+            else {
                 robot.motorLinearSlide.setPower(0);
             }               // if gamepad1.y
 
@@ -234,11 +240,11 @@ public class TeleOp_test extends LinearOpMode {
             /**
              * Park the robot on the balancing stone
              */
-            if(gamepad2.a == true) {            // if gamepad2.a
+            if(gamepad1.a == true) {            // if gamepad2.a
 
             }
 
-            if(gamepad2.a == true) {
+            if(gamepad1.a == true) {
                 robot.servoStone.setPosition(.71);
                 sleep(800);
                 robot.motorLF.setPower(.75);
