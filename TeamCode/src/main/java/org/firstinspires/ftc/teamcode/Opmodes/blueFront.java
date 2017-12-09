@@ -230,11 +230,11 @@ public class blueFront extends LinearOpMode {
                     telemetry.addData("VUMARK", String.valueOf(vuMarkValue));
                     telemetry.addData("SERVO position", robot.servoLeft.getPosition());
                     telemetry.update();
-                    sleep(1000);
+                    sleep(3000);
                     if (robot.colorSensorRight.blue() > robot.colorSensorRight.red()) {  //Blue is back
-                        drive.translateTime(.8, .2, 180);
+                        drive.translateTime(1.2, .2, 180);
                     }
-                    else {
+                    else if (robot.colorSensorRight.blue() < robot.colorSensorRight.red()) {
                         drive.translateTime(.8, .2, 0);
                     }
 
@@ -253,7 +253,7 @@ public class blueFront extends LinearOpMode {
                     drive.pivotLeft(.2, 90);
 
                     telemetry.addData("VUMARK", String.valueOf(vuMarkValue));
-                    telemetry.addData("Action = ", "Drive forward");
+                    telemetry.addData("Action = ", "Drive towards Glyph box");
                     telemetry.update();
                     drive.translateRange(.2, 180, 20);
 
@@ -293,6 +293,12 @@ public class blueFront extends LinearOpMode {
                     sleep(100);
                     drive.translateTime(1.5, .2, 270);
 
+                    telemetry.addData("Range", String.valueOf(robot.rangeSensor.cmUltrasonic()));
+                    telemetry.addData("Action = ", "move forward to place block");
+                    telemetry.update();
+                    sleep(100);
+                    drive.translateRange(.2, 180, 14);
+
                     telemetry.addData("Action = ", "Kick block");
                     telemetry.update();
                     sleep(100);
@@ -300,16 +306,16 @@ public class blueFront extends LinearOpMode {
 
                     telemetry.addData("Action = ", "drive backward");
                     telemetry.update();
-                    drive.translateTime(.75, .2, 0);
+                    drive.translateTime(2, .2, 0);
 
                     telemetry.addData("Action = ", "drive forward to push block into place");
                     telemetry.update();
                     sleep(500);
-                    drive.translateTime(1, .2, 180);
+                    drive.translateTime(1.5, .2, 180);
 
                     telemetry.addData("Action = ", "drive backward & Halt");
                     telemetry.update();
-                    drive.translateTime(.5, .2, 0);
+                    drive.translateTime(1.5, .2, 0);
 
                     state = State.HALT;
 
@@ -333,21 +339,17 @@ public class blueFront extends LinearOpMode {
                     sleep(100);
                     drive.translateTime(2   , .2, 270);
 
-                    telemetry.addData("Action = ", "Drive forward to make sure we haven't drifted too far back");
-                    telemetry.update();
-                    sleep(100);
-                    drive.translateRange(.2, 180, 18);
-                    telemetry.addData("Range", String.valueOf(robot.rangeSensor.cmUltrasonic()));
-                    telemetry.addData("Action = ", "strafe right to find the next fin");
-                    telemetry.update();
-                    sleep(100);
-                    drive.translateRange(.2, 270, 13);
-
                     telemetry.addData("Range", String.valueOf(robot.rangeSensor.cmUltrasonic()));
                     telemetry.addData("Action = ", "strafe right to position block");
                     telemetry.update();
                     sleep(100);
-                    drive.translateTime(1.5, .2, 270);
+                    drive.translateTime(1.7, .2, 270);
+
+                    telemetry.addData("Range", String.valueOf(robot.rangeSensor.cmUltrasonic()));
+                    telemetry.addData("Action = ", "move forward to place block");
+                    telemetry.update();
+                    sleep(100);
+                    drive.translateRange(.2, 180, 14);
 
                     telemetry.addData("Action = ", "Kick block");
                     telemetry.update();
@@ -355,16 +357,16 @@ public class blueFront extends LinearOpMode {
 
                     telemetry.addData("Action = ", "drive backward");
                     telemetry.update();
-                    drive.translateTime(1, .2, 0);
+                    drive.translateTime(2, .2, 0);
 
                     sleep(500);
                     telemetry.addData("Action = ", "drive forward");
                     telemetry.update();
-                    drive.translateTime(1, .2, 180);
+                    drive.translateTime(1.5, .2, 180);
 
                     telemetry.addData("Action = ", "drive backward & Halt");
                     telemetry.update();
-                    drive.translateTime(.5, .2, 0);
+                    drive.translateTime(1.5, .2, 0);
 
                     state = State.HALT;
 
@@ -382,46 +384,36 @@ public class blueFront extends LinearOpMode {
                     sleep(100);
                     drive.translateRange(.2, 270, 15);
 
-                    telemetry.addData("Range", String.valueOf(robot.rangeSensor.cmUltrasonic()));
-                    telemetry.addData("Action = ", "strafe right #2");
-                    telemetry.update();
-                    sleep(100);
-                    drive.translateTime(5, .2, 270);
-
-                    telemetry.addData("Action = ", "Drive forward");
-                    telemetry.update();
-                    sleep(100);
-                    drive.translateRange(.2, 180, 18);
-
-                    telemetry.addData("Range", String.valueOf(robot.rangeSensor.cmUltrasonic()));
-                    telemetry.addData("Action = ", "strafe right #1");
-                    telemetry.update();
-                    sleep(100);
-                    drive.translateRange(.2, 270, 15);
 
                     telemetry.addData("Range", String.valueOf(robot.rangeSensor.cmUltrasonic()));
                     telemetry.addData("Action = ", "strafe right #2");
                     telemetry.update();
                     sleep(100);
-                    drive.translateTime(1.5, .2, 270);
+                    drive.translateTime(5.6, .2, 270);
+
+                    telemetry.addData("Range", String.valueOf(robot.rangeSensor.cmUltrasonic()));
+                    telemetry.addData("Action = ", "move forward to place block");
+                    telemetry.update();
+                    sleep(100);
+                    drive.translateRange(.2, 180, 14);
 
                     telemetry.addData("Action = ", "Kick block");
                     telemetry.update();
                     sleep(100);
                     robot.servoBlockExit.setPosition(.5);
 
-                    telemetry.addData("Action = ", "drive backward & Halt");
+                    telemetry.addData("Action = ", "drive backward");
                     telemetry.update();
-                    drive.translateTime(.75, .2, 0);
+                    drive.translateTime(2, .2, 0);
 
                     telemetry.addData("Action = ", "drive backward & Halt");
                     telemetry.update();
                     sleep(500);
-                    drive.translateTime(1, .2, 180);
+                    drive.translateTime(1.5, .2, 180);
 
                     telemetry.addData("Action = ", "drive backward & Halt");
                     telemetry.update();
-                    drive.translateTime(.5, .2, 0);
+                    drive.translateTime(1.5, .2, 0);
 
                     state = State.HALT;
 

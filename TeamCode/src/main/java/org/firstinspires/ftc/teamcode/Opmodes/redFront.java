@@ -175,6 +175,9 @@ public class redFront extends LinearOpMode {
                     break;
 
                 case VUMark:
+
+                    drive.translateTime(2, .2, 180);
+
                     RelicRecoveryVuMark vuMark = RelicRecoveryVuMark.from(relicTemplate);
 
                     if (count == 1) {  //Only do this the first time
@@ -223,7 +226,7 @@ public class redFront extends LinearOpMode {
 
                     robot.servoLeft.setPosition(.3);
                     telemetry.addData("VUMARK", String.valueOf(vuMarkValue));
-                    telemetry.addData("SERVO position", robot.servoRight.getPosition());
+                    telemetry.addData("SERVO position", robot.servoLeft.getPosition());
                     telemetry.update();
                     sleep(2000);
                     if (robot.colorSensorLeft.blue() > robot.colorSensorLeft.red()) {  //Blue is back
@@ -231,15 +234,15 @@ public class redFront extends LinearOpMode {
                         telemetry.update();
                         drive.translateTime(.75, .2, 0);
                     }
-                    else {
+                    else if (robot.colorSensorLeft.blue() < robot.colorSensorLeft.red()){
                         telemetry.addData("Ball Color = ", "red");
                         telemetry.update();
-                        drive.translateTime(.8, .2, 180);
+                        drive.translateTime(1.2, .2, 180);
                     }
 
                     robot.servoLeft.setPosition(.9);
 
-                    state = State.FIND_GLYPH_BOX;
+                    state = State.VUMark;
                     break;
 
                 case FIND_GLYPH_BOX:
@@ -308,7 +311,7 @@ public class redFront extends LinearOpMode {
 
                     telemetry.addData("Action = ", "drive backward & Halt");
                     telemetry.update();
-                    drive.translateTime(.5, .2, 0);
+                    drive.translateTime(1.5, .2, 0);
 
                     state = State.HALT;
 
@@ -316,6 +319,11 @@ public class redFront extends LinearOpMode {
 
                 case CENTER:
 
+                    telemetry.addData("VUMARK", String.valueOf(vuMarkValue));
+                    telemetry.addData("Action = ", "Drive forward");
+                    telemetry.update();
+                    drive.translateRange(.2, 180, 20);
+
                     telemetry.addData("Range", String.valueOf(robot.rangeSensor.cmUltrasonic()));
                     telemetry.addData("Action = ", "strafe right #1");
                     telemetry.update();
@@ -326,7 +334,7 @@ public class redFront extends LinearOpMode {
                     telemetry.addData("Action = ", "strafe right #2");
                     telemetry.update();
                     sleep(100);
-                    drive.translateTime(2.5, .2, 90);
+                    drive.translateTime(1.9, .2, 90);
 
                     telemetry.addData("Action = ", "Kick block");
                     telemetry.update();
@@ -344,13 +352,17 @@ public class redFront extends LinearOpMode {
 
                     telemetry.addData("Action = ", "drive backward & Halt");
                     telemetry.update();
-                    drive.translateTime(.5, .2, 0);
+                    drive.translateTime(1.5, .2, 0);
 
                     state = State.HALT;
 
                     break;
 
                 case LEFT:
+                    telemetry.addData("VUMARK", String.valueOf(vuMarkValue));
+                    telemetry.addData("Action = ", "Drive forward");
+                    telemetry.update();
+                    drive.translateRange(.2, 180, 20);
 
                     telemetry.addData("Range", String.valueOf(robot.rangeSensor.cmUltrasonic()));
                     telemetry.addData("Action = ", "strafe right #1");
@@ -362,25 +374,25 @@ public class redFront extends LinearOpMode {
                     telemetry.addData("Action = ", "strafe right #2");
                     telemetry.update();
                     sleep(100);
-                    drive.translateTime(5.5, .2, 90);
+                    drive.translateTime(4.2, .2, 90);
 
                     telemetry.addData("Action = ", "Kick block");
                     telemetry.update();
-                    robot.servoBlockExit.setPosition(.5);
                     sleep(100);
+                    robot.servoBlockExit.setPosition(.5);
 
-                    drive.translateTime(.75, .2, 0);
+                    drive.translateTime(1, .2, 0);
                     telemetry.addData("Action = ", "drive backward");
                     telemetry.update();
 
                     telemetry.addData("Action = ", "drive forward");
                     telemetry.update();
+                    drive.translateTime(1.25, .2, 180);
                     sleep(500);
-                    drive.translateTime(1, .2, 180);
 
                     telemetry.addData("Action = ", "drive backward & Halt");
                     telemetry.update();
-                    drive.translateTime(.5, .2, 0);
+                    drive.translateTime(1.5, .2, 0);
 
                     state = State.HALT;
 

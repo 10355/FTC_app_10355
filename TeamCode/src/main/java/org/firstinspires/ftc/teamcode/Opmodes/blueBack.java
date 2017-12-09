@@ -229,11 +229,11 @@ public class blueBack extends LinearOpMode {
                     telemetry.addData("VUMARK", String.valueOf(vuMarkValue));
                     telemetry.addData("SERVO position", robot.servoLeft.getPosition());
                     telemetry.update();
-                    sleep(1000);
+                    sleep(3000);
                     if (robot.colorSensorRight.blue() > robot.colorSensorRight.red()) {  //Blue is back
-                        drive.translateTime(.8, .2, 180);
+                        drive.translateTime(1.2, .2, 180);
                     }
-                    else {
+                    else if (robot.colorSensorRight.blue() < robot.colorSensorRight.red()) {
                         drive.translateTime(.8, .2, 0);
                     }
 
@@ -288,16 +288,16 @@ public class blueBack extends LinearOpMode {
 
                     telemetry.addData("Action = ", "drive backward");
                     telemetry.update();
-                    drive.translateTime(1, .2, 0);
+                    drive.translateTime(2, .2, 0);
 
                     telemetry.addData("Action = ", "drive forward to push block into place");
                     telemetry.update();
                     sleep(500);
-                    drive.translateTime(.5, .2, 180);
+                    drive.translateTime(1.5, .2, 180);
 
                     telemetry.addData("Action = ", "drive backward & Halt");
                     telemetry.update();
-                    drive.translateTime(1, .2, 0);
+                    drive.translateTime(1.5, .2, 0);
 
                     state = State.HALT;
 
@@ -339,16 +339,16 @@ public class blueBack extends LinearOpMode {
 
                     telemetry.addData("Action = ", "drive backward");
                     telemetry.update();
-                    drive.translateTime(1, .2, 0);
+                    drive.translateTime(2, .2, 0);
 
                     sleep(500);
                     telemetry.addData("Action = ", "drive forward");
                     telemetry.update();
-                    drive.translateTime(.5, .2, 180);
+                    drive.translateTime(1.5, .2, 180);
 
                     telemetry.addData("Action = ", "drive backward & Halt");
                     telemetry.update();
-                    drive.translateTime(1, .2, 0);
+                    drive.translateTime(1.5, .2, 0);
 
                     state = State.HALT;
 
@@ -386,16 +386,16 @@ public class blueBack extends LinearOpMode {
 
                     telemetry.addData("Action = ", "drive backward");
                     telemetry.update();
-                    drive.translateTime(1, .2, 0);
+                    drive.translateTime(2, .2, 0);
 
                     telemetry.addData("Action = ", "drive backward & Halt");
                     telemetry.update();
                     sleep(500);
-                    drive.translateTime(.5, .2, 180);
+                    drive.translateTime(1.5, .2, 180);
 
                     telemetry.addData("Action = ", "drive backward & Halt");
                     telemetry.update();
-                    drive.translateTime(1, .2, 0);
+                    drive.translateTime(1.5, .2, 0);
 
                     state = State.HALT;
 

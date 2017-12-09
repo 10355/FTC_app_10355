@@ -1,6 +1,7 @@
 package org.firstinspires.ftc.teamcode.Opmodes;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
 import org.firstinspires.ftc.teamcode.HardwareProfiles.HardwareTestPlatform;
@@ -17,6 +18,7 @@ import org.firstinspires.ftc.teamcode.Libs.DriveMecanum;
  * Created by MyPC on 11/8/2017.
  */
 @Autonomous(name="SafeZone", group="COMP")
+@Disabled
 
 public class SafeZone extends LinearOpMode {
 

@@ -69,6 +69,7 @@ import org.firstinspires.ftc.teamcode.Libs.DriveMecanum;
  */
 
 @Autonomous(name="foo2", group="COMP")
+@Disabled
 
 public class foo2 extends LinearOpMode {
 
