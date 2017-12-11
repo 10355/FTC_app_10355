@@ -87,6 +87,9 @@ public class TeleOp_test extends LinearOpMode {
         telemetry.addData("Waiting for Teleop to start.", "");    //
         telemetry.update();
         waitForStart();
+
+        robot.servoRelicGrab.setPosition(0.5);
+
         telemetry.addData("Teleop Test Active", "");    //
         telemetry.update();
         // run until the end of the match (driver presses STOP)
@@ -254,7 +257,7 @@ public class TeleOp_test extends LinearOpMode {
 
                 sleep(300);
 
-                robot.servoStone.setPosition(.2);
+                robot.servoStone.setPosition(.8);
 
                 sleep(700);
 
