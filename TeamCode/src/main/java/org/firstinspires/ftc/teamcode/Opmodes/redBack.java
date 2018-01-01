@@ -77,7 +77,7 @@ public class redBack extends LinearOpMode {
     private LinearOpMode opMode = this;                     //Opmode
     private DataLogger Dl;                                  //Datalogger object
     private String alliance = "red";                       //Your current alliance
-    private State state = State.BALL;                     //Machine State
+    private State state = State.VUMark;                     //Machine State
 
     /**
      * {@link #vuforia} is the variable we will use to store our instance of the Vuforia
@@ -175,8 +175,6 @@ public class redBack extends LinearOpMode {
 
                 case VUMark:
 
-                    drive.translateTime(2, .2, 180);
-
                     RelicRecoveryVuMark vuMark = RelicRecoveryVuMark.from(relicTemplate);
 
                     if (count == 1) {  //Only do this the first time
@@ -215,21 +213,8 @@ public class redBack extends LinearOpMode {
                         telemetry.update();
                         sleep(1000);
 
-                        state = State.CHECK_VU;  //The vuMark was found so move on to the next state
+                        state = State.BALL;  //The vuMark was found so move on to the next state
                     }
-
-                    break;
-
-                case GETTOVU:
-                    telemetry.addData("VUMARK", String.valueOf(vuMarkValue));
-                    telemetry.addData("Action = ", "Drive forward");
-                    telemetry.update();
-                    drive.translateRange(.2, 180, 60);  //distance the robot
-                                            // needs to be from the glyph wall to capture the vu
-
-//                    sleep(500);
-
-                    state = State.VUMark;  //The vuMark was found so move on to the next state
 
                     break;
 
@@ -255,7 +240,7 @@ public class redBack extends LinearOpMode {
 
                     robot.servoLeft.setPosition(.9);
 
-                    state = State.VUMark;
+                    state = State.CHECK_VU;
                     break;
 
                 case CHECK_VU:
@@ -329,7 +314,7 @@ public class redBack extends LinearOpMode {
                     telemetry.addData("Action = ", "strafe right #2");
                     telemetry.update();
                     sleep(100);
-                    drive.translateTime(1.9, .2, 90);
+                    drive.translateTime(2.2, .2, 90);
 
                     telemetry.addData("Action = ", "Kick block");
                     telemetry.update();
@@ -338,12 +323,12 @@ public class redBack extends LinearOpMode {
 
                     telemetry.addData("Action = ", "drive backward");
                     telemetry.update();
-                    drive.translateTime(.75, .2, 0);
+                    drive.translateTime(1.5, .2, 0);
 
                     telemetry.addData("Action = ", "drive forward");
                     telemetry.update();
                     sleep(500);
-                    drive.translateTime(1, .2, 180);
+                    drive.translateTime(1.25, .2, 180);
 
                     telemetry.addData("Action = ", "drive backward & Halt");
                     telemetry.update();
@@ -369,14 +354,14 @@ public class redBack extends LinearOpMode {
                     telemetry.addData("Action = ", "strafe right #2");
                     telemetry.update();
                     sleep(100);
-                    drive.translateTime(4.2, .2, 90);
+                    drive.translateTime(4.4, .2, 90);
 
                     telemetry.addData("Action = ", "Kick block");
                     telemetry.update();
                     sleep(100);
                     robot.servoBlockExit.setPosition(.5);
 
-                    drive.translateTime(1, .2, 0);
+                    drive.translateTime(1.5, .2, 0);
                     telemetry.addData("Action = ", "drive backward");
                     telemetry.update();
 
@@ -394,6 +379,9 @@ public class redBack extends LinearOpMode {
                     break;
 
                 case HALT:
+
+                    robot.servoBlockExit.setPosition(1);
+
                     robot.motorLF.setPower(0);
                     robot.motorLR.setPower(0);
                     robot.motorRF.setPower(0);

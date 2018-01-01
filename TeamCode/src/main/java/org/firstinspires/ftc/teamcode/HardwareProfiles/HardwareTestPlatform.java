@@ -93,25 +93,25 @@ public class HardwareTestPlatform {
 
             //Setup the drive motors
             motorLF = hwMap.dcMotor.get("lf");
-            motorLF.setDirection(DcMotor.Direction.FORWARD); // Set to REVERSE if using AndyMark motors
+            motorLF.setDirection(DcMotor.Direction.REVERSE); // Set to REVERSE if using AndyMark motors
             motorLF.setPower(0);
             motorLF.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
             motorLF.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
             motorLR = hwMap.dcMotor.get("lr");
-            motorLR.setDirection(DcMotor.Direction.FORWARD); // Set to REVERSE if using AndyMark motors
+            motorLR.setDirection(DcMotor.Direction.REVERSE); // Set to REVERSE if using AndyMark motors
             motorLR.setPower(0);
             motorLR.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
             motorLR.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
             motorRF = hwMap.dcMotor.get("rf");
-            motorRF.setDirection(DcMotor.Direction.REVERSE); // Set to REVERSE if using AndyMark motors
+            motorRF.setDirection(DcMotor.Direction.FORWARD); // Set to REVERSE if using AndyMark motors
             motorRF.setPower(0);
             motorRF.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
             motorRF.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
             motorRR = hwMap.dcMotor.get("rr");
-            motorRR.setDirection(DcMotor.Direction.REVERSE); // Set to REVERSE if using AndyMark motors
+            motorRR.setDirection(DcMotor.Direction.FORWARD); // Set to REVERSE if using AndyMark motors
             motorRR.setPower(0);
             motorRR.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
             motorRR.setMode(DcMotor.RunMode.RUN_USING_ENCODER);

@@ -226,16 +226,19 @@ public class blueFront extends LinearOpMode {
                     telemetry.addData("VUMARK", String.valueOf(vuMarkValue));
                     telemetry.update();
 
-                    robot.servoRight.setPosition(.7);
+                    robot.servoRight.setPosition(.75);
                     telemetry.addData("VUMARK", String.valueOf(vuMarkValue));
                     telemetry.addData("SERVO position", robot.servoLeft.getPosition());
                     telemetry.update();
-                    sleep(3000);
+                    sleep(500);
                     if (robot.colorSensorRight.blue() > robot.colorSensorRight.red()) {  //Blue is back
                         drive.translateTime(1.2, .2, 180);
+                        robot.servoRight.setPosition(.1);
                     }
                     else if (robot.colorSensorRight.blue() < robot.colorSensorRight.red()) {
                         drive.translateTime(.8, .2, 0);
+                        robot.servoRight.setPosition(.1);
+                        drive.translateTime(2, .2, 180);
                     }
 
                     robot.servoRight.setPosition(.1);
@@ -246,16 +249,18 @@ public class blueFront extends LinearOpMode {
                 case FIND_GLYPH_BOX:
                     telemetry.addData("Action = ", "Drive forward off of balancing stone");
                     telemetry.update();
-                    drive.translateTime(2, .2, 180);
+                    drive.translateTime(4.5, .2, 180);
 
                     telemetry.addData("Action = ", "Rotate 90 degrees");
                     telemetry.update();
-                    drive.pivotLeft(.2, 90);
+                    drive.pivotLeft(.2, 82);
+
+                    drive.translateTime(1, .2, 90);
 
                     telemetry.addData("VUMARK", String.valueOf(vuMarkValue));
                     telemetry.addData("Action = ", "Drive towards Glyph box");
                     telemetry.update();
-                    drive.translateRange(.2, 180, 20);
+                    drive.translateRange(.2, 180, 22);
 
                     state = State.CHECK_VU;
                     break;
@@ -343,7 +348,7 @@ public class blueFront extends LinearOpMode {
                     telemetry.addData("Action = ", "strafe right to position block");
                     telemetry.update();
                     sleep(100);
-                    drive.translateTime(1.7, .2, 270);
+                    drive.translateTime(1.9, .2, 270);
 
                     telemetry.addData("Range", String.valueOf(robot.rangeSensor.cmUltrasonic()));
                     telemetry.addData("Action = ", "move forward to place block");
@@ -389,7 +394,7 @@ public class blueFront extends LinearOpMode {
                     telemetry.addData("Action = ", "strafe right #2");
                     telemetry.update();
                     sleep(100);
-                    drive.translateTime(5.6, .2, 270);
+                    drive.translateTime(5.8, .2, 270);
 
                     telemetry.addData("Range", String.valueOf(robot.rangeSensor.cmUltrasonic()));
                     telemetry.addData("Action = ", "move forward to place block");
@@ -420,6 +425,9 @@ public class blueFront extends LinearOpMode {
                     break;
 
                 case HALT:
+
+                    robot.servoBlockExit.setPosition(1);
+
                     robot.motorLF.setPower(0);
                     robot.motorLR.setPower(0);
                     robot.motorRF.setPower(0);

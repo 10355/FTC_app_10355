@@ -155,7 +155,7 @@ public class relicArmTest extends LinearOpMode {
                     if(!relicSet) {          // if !relicSet
                         relicSet = true;
                         currentLauncherPosition = robot.motorRelicArm.getCurrentPosition();
-                        targetLauncherPosition = 635;
+                        targetLauncherPosition = 640;
 
                         telemetry.addData("current Launcher Position = ", currentLauncherPosition);
                         telemetry.addData("target Launcher Position = ", targetLauncherPosition);
@@ -187,7 +187,7 @@ public class relicArmTest extends LinearOpMode {
                         robot.motorRelicArm.setPower(0);            // stop the robot relic arm
                         // relic arm should be standing straight up
 
-                        launchPosition = 630;
+                        launchPosition = 640;
                     }
 
                     telemetry.addData("current Launcher Position = ", currentLauncherPosition);
@@ -196,7 +196,7 @@ public class relicArmTest extends LinearOpMode {
                     telemetry.addData("Launcher = ", "set!");
                     telemetry.update();
 
-                    state = State.GRABRELIC;
+                    state = State.GRIP;
                     break;
 
                 case GRABRELIC:
@@ -274,26 +274,58 @@ public class relicArmTest extends LinearOpMode {
                     state = State.HALT;
                     break;
 
+                case GRIP:
+                    sleep(3000);
+                    robot.servoRelicGrab.setPosition(0.1);
+                    sleep(3000);
+
+                    state = State.PLACERELIC;
+
+                    break;
+
                 case PLACERELIC:
+                    sleep (2000);
                     sleep (2000);
 
                     // Lift relic grabber arm up to launching position
-                    robot.motorRelicArm.setPower(.4);
-                    targetLauncherPosition = 700;
+                    robot.motorRelicArm.setPower(launchPower);
+                    targetLauncherPosition = 775;
                     currentLauncherPosition = robot.motorRelicArm.getCurrentPosition();
+                    rotateOffset = currentLauncherPosition;
+
+                    while (currentLauncherPosition < targetLauncherPosition){
+                        currentLauncherPosition = robot.motorRelicArm.getCurrentPosition();
+                        rotateOffset = currentLauncherPosition - rotateOffset;
+                        if(rotateOffset >= 10){
+                            launchPower = launchPower - 0.002;
+                            robot.motorRelicArm.setPower(launchPower);
+                        }
+                        telemetry.addData("current Launcher Position = ", currentLauncherPosition);
+                        telemetry.addData("target Launcher Position = ", targetLauncherPosition);
+                        telemetry.addData("Launch Power = ", launchPower);
+                        telemetry.addData("Launch Position = ", launchPosition);
+                        telemetry.update();
+                    }
+
+/*                    robot.motorRelicArm.setPower(.05);
+
+                    currentLauncherPosition = robot.motorRelicArm.getCurrentPosition();
+                    targetLauncherPosition = 800;                   // position where the relic is located
 
                     while (currentLauncherPosition < targetLauncherPosition){
                         currentLauncherPosition = robot.motorRelicArm.getCurrentPosition();
                         telemetry.addData("current Launcher Position = ", currentLauncherPosition);
                         telemetry.addData("target Launcher Position = ", targetLauncherPosition);
                         telemetry.addData("Launch Position = ", launchPosition);
+                        telemetry.addData("Launcher = ", "Grabbing the relic");
                         telemetry.update();
                     }
+*/
 
-                    robot.motorRelicArm.setPower(.1);
+                    robot.motorRelicArm.setPower(0.004);
 
                     currentLauncherPosition = robot.motorRelicArm.getCurrentPosition();
-                    targetLauncherPosition = 815;                   // position where the relic is located
+                    targetLauncherPosition = 800;                   // position where the relic is located
 
                     while (currentLauncherPosition < targetLauncherPosition){
                         currentLauncherPosition = robot.motorRelicArm.getCurrentPosition();
@@ -306,7 +338,12 @@ public class relicArmTest extends LinearOpMode {
 
                     robot.motorRelicArm.setPower(-.05);            // slow the robot relic arm down
 
-                    robot.servoRelicGrab.setPosition(0.1);
+                    sleep(300);
+                    robot.servoRelicGrab.setPosition(0.6);
+
+                    sleep(1000);
+
+                    robot.motorRelicArm.setPower(-.05);            // slow the robot relic arm down
 
                     robot.motorRelicArm.setPower(-.1);            // robot relic arm to set position
 
@@ -320,6 +357,8 @@ public class relicArmTest extends LinearOpMode {
                     }
 
                     robot.motorRelicArm.setPower(0);            // stop the robot relic arm
+
+                    sleep(5000);
 
                     state = State.HALT;
                     break;
@@ -388,7 +427,7 @@ public class relicArmTest extends LinearOpMode {
      * Enumerate the States of the machine.
      */
     enum State {
-        SETRELICARM, GRABRELIC, PLACERELIC, HALT
+        SETRELICARM, GRABRELIC, PLACERELIC, GRIP, HALT
     }
 
 }

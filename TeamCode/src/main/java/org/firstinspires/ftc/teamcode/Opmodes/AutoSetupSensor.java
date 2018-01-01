@@ -80,6 +80,7 @@ public class AutoSetupSensor extends LinearOpMode {
     public double currentZint = 0;
     public double rangeDistance = 0;
     public double currentLauncherPosition =0;
+    public double currentGlyphArmPosition = 0;
 
     private final static HardwareTestPlatform robot = new HardwareTestPlatform();
 
@@ -121,8 +122,8 @@ public class AutoSetupSensor extends LinearOpMode {
             telemetry.addData("colorRightRed = ", colorRightRed);
             telemetry.addData("colorRightBlue = ", colorRightBlue);
             telemetry.addData("Current Launcher Position = ", currentLauncherPosition);
+            telemetry.addData("Current Glyph Arm Position = ", currentGlyphArmPosition);
             telemetry.update();
-
 
             idle();
 
@@ -141,6 +142,7 @@ public class AutoSetupSensor extends LinearOpMode {
         currentZint = robot.mrGyro.getIntegratedZValue();
         rangeDistance = robot.rangeSensor.cmUltrasonic();
         currentLauncherPosition = robot.motorRelicArm.getCurrentPosition();
+        currentGlyphArmPosition = robot.motorLift.getCurrentPosition();
 
     }
 

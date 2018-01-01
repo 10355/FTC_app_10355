@@ -273,7 +273,7 @@ public class blueBack extends LinearOpMode {
                     telemetry.addData("Action = ", "strafe right #2");
                     telemetry.update();
                     sleep(100);
-                    drive.translateTime(1.5, .2, 270);
+                    drive.translateTime(1.3, .2, 270);
 
                     telemetry.addData("Range", String.valueOf(robot.rangeSensor.cmUltrasonic()));
                     telemetry.addData("Action = ", "move forward to place block");
@@ -325,7 +325,7 @@ public class blueBack extends LinearOpMode {
                     telemetry.addData("Action = ", "strafe right to position block");
                     telemetry.update();
                     sleep(100);
-                    drive.translateTime(1.7, .2, 270);
+                    drive.translateTime(1.9, .2, 270);
 
                     telemetry.addData("Range", String.valueOf(robot.rangeSensor.cmUltrasonic()));
                     telemetry.addData("Action = ", "move forward to place block");
@@ -344,7 +344,7 @@ public class blueBack extends LinearOpMode {
                     sleep(500);
                     telemetry.addData("Action = ", "drive forward");
                     telemetry.update();
-                    drive.translateTime(1.5, .2, 180);
+                    drive.translateTime(1.8, .2, 180);
 
                     telemetry.addData("Action = ", "drive backward & Halt");
                     telemetry.update();
@@ -371,7 +371,7 @@ public class blueBack extends LinearOpMode {
                     telemetry.addData("Action = ", "strafe right #2");
                     telemetry.update();
                     sleep(100);
-                    drive.translateTime(5.6, .2, 270);
+                    drive.translateTime(5.8, .2, 270);
 
                     telemetry.addData("Range", String.valueOf(robot.rangeSensor.cmUltrasonic()));
                     telemetry.addData("Action = ", "move forward to place block");
@@ -402,6 +402,8 @@ public class blueBack extends LinearOpMode {
                     break;
 
                 case HALT:
+                    robot.servoBlockExit.setPosition(1);
+
                     robot.motorLF.setPower(0);
                     robot.motorLR.setPower(0);
                     robot.motorRF.setPower(0);
