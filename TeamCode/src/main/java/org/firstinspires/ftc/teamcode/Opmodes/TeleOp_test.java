@@ -70,6 +70,7 @@ public class TeleOp_test extends LinearOpMode {
 
     public static final double RELICSETPOSITION = 640;
     public static final double MINARMPOSITION = -590;
+    public static final double TARGETARMPOSITION = -570;
     public static final double MAXARMPOSITION = -10;
 
     @Override
@@ -153,6 +154,16 @@ public class TeleOp_test extends LinearOpMode {
             if (gamepad1.left_bumper){      // if gamepad1.left_bumper
                 rangeDistance = robot.rangeSensor.cmUltrasonic();
                 while (rangeDistance > 50){         // while rangeDistance
+                    // lower arm into the correct position
+
+                    currentGlyphArmPosition = robot.motorLift.getCurrentPosition();
+                    if (currentGlyphArmPosition > MINARMPOSITION){
+                        robot.motorLift.setPower(-.1);
+                    }else if (currentGlyphArmPosition > MINARMPOSITION){
+                        robot.motorLift.setPower(0);
+                    }
+
+                    // drive fulll speed towards glyphs
                     robot.motorLF.setPower(-1);
                     robot.motorLR.setPower(-1);
                     robot.motorRF.setPower(-1);
@@ -163,8 +174,22 @@ public class TeleOp_test extends LinearOpMode {
             }           // if gamepad1.left_bumper
 
             if (gamepad1.right_bumper) {     // if gamepad1.right_bumper
+
                 rangeDistance = robot.rangeSensor.cmUltrasonic();
                 while (rangeDistance < 100) {       // while rangeDistance
+
+                    // lower arm into the correct position
+
+                    currentGlyphArmPosition = robot.motorLift.getCurrentPosition();
+                    if (currentGlyphArmPosition < MINARMPOSITION){
+                        robot.motorLift.setPower(.1);
+                    }else if (currentGlyphArmPosition > TARGETARMPOSITION){
+                        robot.motorLift.setPower(-.1);
+                    } else {
+                        robot.motorLift.setPower(0);
+                    }
+
+                    // drive fulll speed towards glyphs
                     robot.motorLF.setPower(1);
                     robot.motorLR.setPower(1);
                     robot.motorRF.setPower(1);
@@ -190,7 +215,7 @@ public class TeleOp_test extends LinearOpMode {
                 robot.servoBlockExit.setPosition(1);
             }           // if gamepad1.x
 
-            if ((gamepad2.right_bumper ||gamepad1.right_bumper) && (relicRightPosition < 1)) {
+            if ((gamepad2.right_bumper) && (relicRightPosition < 1)) {
                 relicRightPosition = 1;
                 robot.servoLiftRight.setPosition(relicRightPosition);
                 robot.servoLiftLeft.setPosition(0);

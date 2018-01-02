@@ -32,6 +32,7 @@ THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 package org.firstinspires.ftc.teamcode.Opmodes;
 
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 
@@ -52,6 +53,7 @@ import org.firstinspires.ftc.teamcode.HardwareProfiles.HardwareTestPlatform;
  */
 
 @com.qualcomm.robotcore.eventloop.opmode.TeleOp(name = "COMP TeleOpRearWheelDrive OpModeMecanum", group = "COMP")
+@Disabled
 
 public class TeleOpMecanum extends LinearOpMode {
     /**
