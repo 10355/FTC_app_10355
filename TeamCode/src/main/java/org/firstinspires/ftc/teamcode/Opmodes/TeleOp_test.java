@@ -69,8 +69,8 @@ public class TeleOp_test extends LinearOpMode {
     boolean relicCaptured = false;          // flag to identify if the relic is captured
 
     public static final double RELICSETPOSITION = 640;
-    public static final double MINARMPOSITION = -590;
-    public static final double TARGETARMPOSITION = -570;
+    public static final double MINARMPOSITION = -520;
+    public static final double TARGETARMPOSITION = -500;
     public static final double MAXARMPOSITION = -10;
 
     @Override
@@ -108,7 +108,7 @@ public class TeleOp_test extends LinearOpMode {
              *  Gamepad1 Controls
              *      -   Drive & Strafe          =    Gamepad1.Left_Stick
              *      -   Drive & rotate          =    Gamepad1.Right_Stick
-             *      -   Autopark                =    Gamepad1.a
+             *      -   Autopark                =    Gamepad1.x
              *      -   Speed Forward           =    Gamepad1.left_bumper
              *      -   Speed Backward          =    Gamepad1.right_bumper
              */
@@ -134,31 +134,26 @@ public class TeleOp_test extends LinearOpMode {
             /**
              * Park the robot on the balancing stone
              */
-            if(gamepad1.a == true) {
-                robot.servoStone.setPosition(.71);
-                sleep(800);
+            if(gamepad1.x == true) {
                 robot.motorLF.setPower(.75);
                 robot.motorRF.setPower(.75);
                 robot.motorLR.setPower(.75);
                 robot.motorRR.setPower(.75);
 
-                sleep(300);
-
-                robot.servoStone.setPosition(.8);
-
-                sleep(700);
+                sleep(1100);
 
                 motorsHalt();
-            }  // if gamepad1.a
+            }  // if gamepad1.x
 
             if (gamepad1.left_bumper){      // if gamepad1.left_bumper
                 rangeDistance = robot.rangeSensor.cmUltrasonic();
-                while (rangeDistance > 50){         // while rangeDistance
+                while (rangeDistance > 40){         // while rangeDistance
                     // lower arm into the correct position
 
+                    // raise arm into position to place glyphs in loader
                     currentGlyphArmPosition = robot.motorLift.getCurrentPosition();
-                    if (currentGlyphArmPosition > MINARMPOSITION){
-                        robot.motorLift.setPower(-.1);
+                    if (currentGlyphArmPosition > MAXARMPOSITION){
+                        robot.motorLift.setPower(.2);
                     }else if (currentGlyphArmPosition > MINARMPOSITION){
                         robot.motorLift.setPower(0);
                     }
@@ -184,7 +179,9 @@ public class TeleOp_test extends LinearOpMode {
                     if (currentGlyphArmPosition < MINARMPOSITION){
                         robot.motorLift.setPower(.1);
                     }else if (currentGlyphArmPosition > TARGETARMPOSITION){
-                        robot.motorLift.setPower(-.1);
+                        robot.motorLift.setPower(-.2);
+                        robot.servoLiftLeft.setPosition (0.25);
+                        robot.servoLiftRight.setPosition(0.75);
                     } else {
                         robot.motorLift.setPower(0);
                     }
@@ -196,23 +193,24 @@ public class TeleOp_test extends LinearOpMode {
                     robot.motorRR.setPower(1);
                     rangeDistance = robot.rangeSensor.cmUltrasonic();
                 }                   // while rangeDistance
+
                 motorsHalt();
             }               // if gamepad1.right_bumper
             /**
              *  Gamepad2 Controls
-             *      -   Block ejector   =   gamepad2.x
+             *      -   Block ejector   =   gamepad2.b
              *      -   Tail controls   =   gamepad2.right_trigger
              *      -   Tail controls   =   gamepad2.left_trigger
              *      -   Linear Slide Up =   gamepad2.y
              *      -   Linear Slide Dn =   gamepad2.a
-             *      -   Glyph arm control   =   gamepad2.dpad_up & down
+             *      -   Glyph arm control   =   gamepad2.right_stick
              */
 
             if (gamepad1.b || gamepad2.b) {           // if gamepad1.x
                 robot.servoBlockExit.setPosition(.5);
                 sleep(400);
             } else{
-                robot.servoBlockExit.setPosition(1);
+                robot.servoBlockExit.setPosition(.95);
             }           // if gamepad1.x
 
             if ((gamepad2.right_bumper) && (relicRightPosition < 1)) {
@@ -228,18 +226,22 @@ public class TeleOp_test extends LinearOpMode {
             }  // gamepad1.left_bumper
 
             if (gamepad2.a) {
+                // lower Glyph control arm
+                // need to get it out of the way so that
+                currentGlyphArmPosition = robot.motorLift.getCurrentPosition();
+                while (currentGlyphArmPosition > (TARGETARMPOSITION/2)) {
+                    currentGlyphArmPosition = robot.motorLift.getCurrentPosition();
+                    robot.motorLift.setPower(-.2);
+                }
+                robot.motorLift.setPower(0);
+
 //                currentSlidePosition = robot.motorLinearSlide.getCurrentPosition();
 //                if (currentSlidePosition>5) {
                     robot.motorLinearSlide.setPower(-.6);
 //                } else{
 //                    robot.motorLinearSlide.setPower(0);
 //                }
-            }
-            else {
-                robot.motorLinearSlide.setPower(0);
-            }               // if gamepad1.a
-
-            if (gamepad2.y){            // if gamepad1.y
+            } else if (gamepad2.y){            // if gamepad1.y
                 currentSlidePosition = robot.motorLinearSlide.getCurrentPosition();
                 if (currentSlidePosition<100) {
                     robot.motorLinearSlide.setPower(.6);
@@ -249,38 +251,36 @@ public class TeleOp_test extends LinearOpMode {
             }
             else {
                 robot.motorLinearSlide.setPower(0);
-            }                   // if gamepad1.y
+            }                   // if gamepad2.y
 
-            if (gamepad2.left_stick_y < 0 ) {         // if gamepad1.dpad_up
-                currentGlyphArmPosition = robot.motorLift.getCurrentPosition();
-                if (currentGlyphArmPosition > MAXARMPOSITION){
-                    robot.servoLiftRight.setPosition(.9);
-                    robot.servoLiftLeft.setPosition(.15);
-                    robot.motorLift.setPower(-.15);
-                } else {
-                   triggerPower = gamepad1.right_trigger * -0.5;
-                   robot.motorLift.setPower(triggerPower);
-                }
+            if (gamepad2.left_stick_y < 0 ) {         // if gamepad2.left_stick_y
+                robot.motorLift.setPower(.2);
             } else if (gamepad2.left_stick_y > 0) {
-                currentGlyphArmPosition = robot.motorLift.getCurrentPosition();
-                if (currentGlyphArmPosition > MINARMPOSITION) {
-                    robot.motorLift.setPower(-.1);
-                }else{
-                    triggerPower = gamepad1.left_trigger * 0.5;
-                    robot.motorLift.setPower(triggerPower);
-                }
+                    robot.motorLift.setPower(-.2);
             } else {
                 currentGlyphArmPosition = robot.motorLift.getCurrentPosition();
-                if (currentGlyphArmPosition < MINARMPOSITION){
+                if (currentGlyphArmPosition < MINARMPOSITION) {
                     robot.motorLift.setPower(.1);
-                }else if (currentGlyphArmPosition > MAXARMPOSITION){
-//                    robot.motorLift.setPower(-.1);
-                } else {
+                }else{
                     robot.motorLift.setPower(0);
                 }
-            }  // if gamepad1.dpad_up
+              }  // if gamepad2.left_stick_y
 
-            if(gamepad1.x || gamepad2.x) {
+            if (gamepad2.right_stick_y != 0) {         // if gamepad2.right_stick_y
+                triggerPower = gamepad2.right_stick_y * 0.10;
+                robot.motorRelicArm.setPower(triggerPower);
+            } else {
+                    robot.motorRelicArm.setPower(0);
+            }  // if gamepad2.right_stick_y
+
+            if(gamepad2.right_trigger > 0 ){
+                robot.servoRelicGrab.setPosition(0);
+            }
+
+            if (gamepad2.left_trigger >0) {
+                robot.servoRelicGrab.setPosition(.7);
+            }
+/**            if(gamepad1.x || gamepad2.x) {
                 currentLauncherPosition = robot.motorRelicArm.getCurrentPosition();
 
                 if (!relicSet) {          // if !relicSet
@@ -290,11 +290,12 @@ public class TeleOp_test extends LinearOpMode {
                     setRelicArm();
                 }
             }       // if gamepad2.x
-
+**/
 
             telemetry.addData("Left_Stick_Y= ", gamepad2.left_stick_y);
             telemetry.addData("Trigger Power = ", triggerPower);
             telemetry.addData("Current Arm Position = ", currentGlyphArmPosition);
+            telemetry.addData("Current Slide Position = ", currentSlidePosition);
             telemetry.addData("vlf = ", vlf);
             telemetry.addData("vlr = ", vlr);
             telemetry.addData("vrf = ", vrf);
