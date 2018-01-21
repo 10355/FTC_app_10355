@@ -64,9 +64,8 @@ public class TeleOp_test extends LinearOpMode {
     double currentSlidePosition = 0;
     double relicRightPosition = 1;
     double triggerPower = 0;
-    boolean relicSet = false;              // flag to identify if the relic arm has been deployed
-    boolean relicDeploy = false;             // flag to identify if the relic arm is deployed
-    boolean relicCaptured = false;          // flag to identify if the relic is captured
+    double liftUpLimit;
+    double liftDownLimit;
 
     public static final double RELICSETPOSITION = 640;
     public static final double MINARMPOSITION = -520;
@@ -85,8 +84,8 @@ public class TeleOp_test extends LinearOpMode {
 
         robot.servoStone.setPosition(.8);                        // move servoStone out of the way
         robot.servoLeft.setPosition(.9);                          // move servoLeft out of the way
-        robot.servoRight.setPosition(.1);                         // move servoRight out of the way
-        robot.servoRelicGrab.setPosition(0.1);
+        robot.servoRight.setPosition(.15);                         // move servoRight out of the way
+//        robot.servoRelicGrab.setPosition(0.1);
 
         // Send telemetry message to signify robot waiting;
         telemetry.addData("Say", "Hello Driver");    //
@@ -97,7 +96,10 @@ public class TeleOp_test extends LinearOpMode {
         telemetry.update();
         waitForStart();
 
-        robot.servoRelicGrab.setPosition(0.5);
+//        robot.servoRelicGrab.setPosition(0.5);
+
+//        liftUpLimit = robot.liftUpLimit.getValue();
+//        liftDownLimit = robot.liftDownLimit.getValue();
 
         telemetry.addData("Teleop Test Active", "");    //
         telemetry.update();
@@ -108,6 +110,8 @@ public class TeleOp_test extends LinearOpMode {
              *  Gamepad1 Controls
              *      -   Drive & Strafe          =    Gamepad1.Left_Stick
              *      -   Drive & rotate          =    Gamepad1.Right_Stick
+             *      -   servo stone down        =    Gamepad1.Right_Trigger
+             *      -   servo stone up          =    Gamepad1.Left_Triiger
              *      -   Autopark                =    Gamepad1.x
              *      -   Speed Forward           =    Gamepad1.left_bumper
              *      -   Speed Backward          =    Gamepad1.right_bumper
@@ -144,6 +148,16 @@ public class TeleOp_test extends LinearOpMode {
 
                 motorsHalt();
             }  // if gamepad1.x
+
+            // control the balancing stone servo
+
+            if (gamepad1.right_trigger > 0){
+                robot.servoStone.setPosition(.85);
+            }
+
+            if (gamepad1.left_trigger > 0){
+                robot.servoStone.setPosition(.79);
+            }
 
             if (gamepad1.left_bumper){      // if gamepad1.left_bumper
                 rangeDistance = robot.rangeSensor.cmUltrasonic();
@@ -213,6 +227,7 @@ public class TeleOp_test extends LinearOpMode {
                 robot.servoBlockExit.setPosition(.95);
             }           // if gamepad1.x
 
+            //Relic grabber open or close - depends on current position
             if ((gamepad2.right_bumper) && (relicRightPosition < 1)) {
                 relicRightPosition = 1;
                 robot.servoLiftRight.setPosition(relicRightPosition);
@@ -225,31 +240,14 @@ public class TeleOp_test extends LinearOpMode {
                 sleep(200);
             }  // gamepad1.left_bumper
 
-            if (gamepad2.a) {
-                // lower Glyph control arm
-                // need to get it out of the way so that
-                currentGlyphArmPosition = robot.motorLift.getCurrentPosition();
-                while (currentGlyphArmPosition > (TARGETARMPOSITION/2)) {
-                    currentGlyphArmPosition = robot.motorLift.getCurrentPosition();
-                    robot.motorLift.setPower(-.2);
-                }
-                robot.motorLift.setPower(0);
+//            liftUpLimit = robot.liftUpLimit.getValue();
+//            liftDownLimit = robot.liftDownLimit.getValue();
 
-//                currentSlidePosition = robot.motorLinearSlide.getCurrentPosition();
-//                if (currentSlidePosition>5) {
-                    robot.motorLinearSlide.setPower(-.6);
-//                } else{
-//                    robot.motorLinearSlide.setPower(0);
-//                }
-            } else if (gamepad2.y){            // if gamepad1.y
-                currentSlidePosition = robot.motorLinearSlide.getCurrentPosition();
-                if (currentSlidePosition<100) {
-                    robot.motorLinearSlide.setPower(.6);
-                } else{
-                    robot.motorLinearSlide.setPower(0);
-                }
-            }
-            else {
+            if ((gamepad2.a) && (robot.limitDown.getState() == true)) {
+                robot.motorLinearSlide.setPower(-.6);
+            } else if ((gamepad2.y) && (robot.limitUp.getState() == true)){            // if gamepad1.y
+                robot.motorLinearSlide.setPower(.6);
+            } else {
                 robot.motorLinearSlide.setPower(0);
             }                   // if gamepad2.y
 
@@ -290,9 +288,11 @@ public class TeleOp_test extends LinearOpMode {
                     setRelicArm();
                 }
             }       // if gamepad2.x
-**/
+
 
             telemetry.addData("Left_Stick_Y= ", gamepad2.left_stick_y);
+            telemetry.addData("Limit Switch Up = ", liftUpLimit);
+            telemetry.addData("Limit Switch Down = ", liftDownLimit);
             telemetry.addData("Trigger Power = ", triggerPower);
             telemetry.addData("Current Arm Position = ", currentGlyphArmPosition);
             telemetry.addData("Current Slide Position = ", currentSlidePosition);
@@ -305,7 +305,7 @@ public class TeleOp_test extends LinearOpMode {
             telemetry.addData("right_stick_x", String.valueOf(gamepad1.right_stick_x));
             telemetry.addData("right_stick_y", String.valueOf(gamepad1.right_stick_y));
             telemetry.update();
-
+**/
             idle();
             } // while opModeIsActive
 

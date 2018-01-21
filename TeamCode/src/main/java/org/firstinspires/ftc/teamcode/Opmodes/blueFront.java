@@ -394,7 +394,7 @@ public class blueFront extends LinearOpMode {
                     telemetry.addData("Action = ", "strafe right #2");
                     telemetry.update();
                     sleep(100);
-                    drive.translateTime(5.8, .2, 270);
+                    drive.translateTime(5.9, .2, 270);
 
                     telemetry.addData("Range", String.valueOf(robot.rangeSensor.cmUltrasonic()));
                     telemetry.addData("Action = ", "move forward to place block");

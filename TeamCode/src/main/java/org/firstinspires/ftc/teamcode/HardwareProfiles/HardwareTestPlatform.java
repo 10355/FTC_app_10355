@@ -1,17 +1,21 @@
 package org.firstinspires.ftc.teamcode.HardwareProfiles;
 
+import android.text.method.Touch;
+
 import com.qualcomm.hardware.bosch.BNO055IMU;
 import com.qualcomm.hardware.modernrobotics.ModernRoboticsI2cGyro;
 import com.qualcomm.hardware.modernrobotics.ModernRoboticsI2cRangeSensor;
 import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
+import com.qualcomm.robotcore.hardware.DeviceInterfaceModule;
 import com.qualcomm.robotcore.hardware.GyroSensor;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.I2cAddr;
 import com.qualcomm.robotcore.hardware.OpticalDistanceSensor;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.hardware.TouchSensor;
+import com.qualcomm.robotcore.hardware.DigitalChannel;
 
 
 /**
@@ -44,9 +48,16 @@ public class HardwareTestPlatform {
     public Servo servoLiftLeft;                 //Declare the servo
     public Servo servoRelicGrab;                //Declare the servo
     public Servo servoStone;                    //Declare the servo
-    public Servo servoBlockExit;                     //Declare the block exit servo
+    public Servo servoBlockExit;                //Declare the block exit servo
+//    public TouchSensor limitUp;             //Declare the Lift up limit switch
+//    public TouchSensor limitDown;           //Declare the Lift down limit switch
     public BNO055IMU imu = null;
     public ModernRoboticsI2cRangeSensor rangeSensor;
+
+    public DeviceInterfaceModule dim;                  // Device Object
+    public DigitalChannel        limitUp;                // Device Object
+    public DigitalChannel        limitDown;            // Device Object
+
 
     //Wheel Setup
     static final double     COUNTS_PER_MOTOR_REV    = 1120 ;    // AndyMark 40
@@ -90,6 +101,12 @@ public class HardwareTestPlatform {
             I2cAddr i2CAddressRangeLeft = I2cAddr.create8bit(0x28);
             rangeSensor = hwMap.get(ModernRoboticsI2cRangeSensor.class, "range");
             rangeSensor.setI2cAddress(i2CAddressRangeLeft);
+
+            //Define the the limit switches for the glyph box
+            limitUp= hwMap.get(DigitalChannel.class, "liftUp");
+            limitDown= hwMap.get(DigitalChannel.class, "liftDown");
+            limitUp.setMode(DigitalChannel.Mode.INPUT);          // Set the direction of each channel
+            limitDown.setMode(DigitalChannel.Mode.INPUT);
 
             //Setup the drive motors
             motorLF = hwMap.dcMotor.get("lf");

@@ -370,7 +370,7 @@ public class redFront extends LinearOpMode {
                     telemetry.addData("Action = ", "strafe right #2");
                     telemetry.update();
                     sleep(100);
-                    drive.translateTime(4.2, .2, 90);
+                    drive.translateTime(4.4, .2, 90);
 
                     telemetry.addData("Action = ", "Kick block");
                     telemetry.update();

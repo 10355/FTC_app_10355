@@ -283,7 +283,7 @@ public class redBack extends LinearOpMode {
 
                     telemetry.addData("Action = ", "drive backward");
                     telemetry.update();
-                    drive.translateTime(.75, .2, 0);
+                    drive.translateTime(1.25, .2, 0);
 
                     telemetry.addData("Action = ", "drive forward");
                     telemetry.update();
