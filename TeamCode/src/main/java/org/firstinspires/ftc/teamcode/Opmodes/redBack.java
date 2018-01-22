@@ -47,6 +47,7 @@ package org.firstinspires.ftc.teamcode.Opmodes;
  */
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
@@ -65,6 +66,7 @@ import org.firstinspires.ftc.teamcode.Libs.DriveMecanum;
  * Name the opMode and put it in the appropriate group
  */
 @Autonomous(name = "Auto Red Back", group = "COMP")
+@Disabled
 
 public class redBack extends LinearOpMode {
 
