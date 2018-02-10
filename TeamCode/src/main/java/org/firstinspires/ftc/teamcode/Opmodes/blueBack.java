@@ -250,11 +250,9 @@ public class blueBack extends LinearOpMode {
 
                     if (vuMarkValue == "LEFT") {
                         state = State.LEFT;
-                    }
-                    if (vuMarkValue == "CENTER") {
+                    } else if (vuMarkValue == "CENTER") {
                         state = State.CENTER;
-                    }
-                    if (vuMarkValue == "RIGHT") {
+                    } else {
                         state = State.RIGHT;
                     }
                     break;

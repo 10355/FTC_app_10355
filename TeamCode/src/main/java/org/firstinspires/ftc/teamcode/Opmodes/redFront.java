@@ -26,7 +26,7 @@ package org.firstinspires.ftc.teamcode.Opmodes;
             - 1 for controlling balancing stone manipulation
         - Gyro sensor located at the center of the robot - utilized to compensate for drift
         - 2 x Color sensor (colorSensorLeft)- utilized to identify gem color
-        - 1 x Range Sensor - utilized to position distance from wall during autonomous mode
+        - 2 x Range Sensors - utilized to position distance from wall during autonomous mode
         - 1 x Motorola Camera - Utilized for decrypting the location of the glyph in autonomous mode
 
     State Order:
@@ -65,7 +65,7 @@ import org.firstinspires.ftc.teamcode.Libs.DriveMecanum;
 /**
  * Name the opMode and put it in the appropriate group
  */
-@Autonomous(name = "Auto Red Front", group = "COMP")
+@Autonomous(name = "STATE - Auto Red Front", group = "COMP")
 
 public class redFront extends LinearOpMode {
 
@@ -221,7 +221,7 @@ public class redFront extends LinearOpMode {
                     telemetry.addData("VUMARK", String.valueOf(vuMarkValue));
                     telemetry.addData("SERVO position", robot.servoLeft.getPosition());
                     telemetry.update();
-                    sleep(500);
+                    sleep(2000);
                     if (robot.colorSensorLeft.blue() > robot.colorSensorLeft.red()) {  //Blue is back
                         telemetry.addData("Ball Color = ", "blue");
                         telemetry.update();
@@ -244,11 +244,15 @@ public class redFront extends LinearOpMode {
                 case FIND_GLYPH_BOX:
                     telemetry.addData("Action = ", "Drive forward off of balancing stone");
                     telemetry.update();
-                    drive.translateTime(4.5, .2, 180);
+                    drive.translateTime(5.5, .2, 180);
 
                     telemetry.addData("Action = ", "Rotate 90 degrees");
                     telemetry.update();
                     drive.pivotRight(.2, 85);
+
+                    telemetry.addData("Action = ", "Drive forward off of balancing stone");
+                    telemetry.update();
+                    drive.translateTime(.75, .2, 270);
 
                     telemetry.addData("VUMARK", String.valueOf(vuMarkValue));
                     telemetry.addData("Action = ", "Drive forward");
@@ -264,11 +268,9 @@ public class redFront extends LinearOpMode {
 
                     if (vuMarkValue == "LEFT") {
                         state = State.LEFT;
-                    }
-                    if (vuMarkValue == "CENTER") {
+                    } else if (vuMarkValue == "CENTER") {
                         state = State.CENTER;
-                    }
-                    if (vuMarkValue == "RIGHT") {
+                    } else {
                         state = State.RIGHT;
                     }
                     break;
@@ -370,7 +372,7 @@ public class redFront extends LinearOpMode {
                     telemetry.addData("Action = ", "strafe right #2");
                     telemetry.update();
                     sleep(100);
-                    drive.translateTime(4.4, .2, 90);
+                    drive.translateTime(4.6, .2, 90);
 
                     telemetry.addData("Action = ", "Kick block");
                     telemetry.update();

@@ -252,6 +252,49 @@ public class DriveMecanum {
         motorsHalt();
 
     }
+
+    /**
+     * Translate on a heading for a defined period of time.
+     */
+    public void translateRangeRight(double power, double heading, int range) {
+        double timeOutTime;
+        procedure = "translateRangeRight";
+        initZ = robot.mrGyro.getIntegratedZValue();
+        radians = getRadians(heading);
+
+        while (opMode.opModeIsActive() &&
+                robot.rangeSensorRight.rawUltrasonic() > range) {
+            LF = calcLF(radians, power);
+            RF = calcRF(radians, power);
+            LR = calcLR(radians, power);
+            RR = calcRR(radians, power);
+
+            currentZint = robot.mrGyro.getIntegratedZValue();
+
+            if (currentZint != initZ) {  //Robot has drifted off course
+                zCorrection = Math.abs(initZ - currentZint);
+
+                courseCorrect();
+            } else {
+                zCorrection = 0;
+            }
+
+            setPower(LF, LR, RF, RR);
+
+            myCurrentMotorPosition = robot.motorLF.getCurrentPosition();
+
+            if (tel) {
+                telemetry();
+                logData();
+            }
+
+            opMode.idle();
+        }
+
+        motorsHalt();
+
+    }
+
     /**
      * Translate on a heading for a defined period of time.
      */
@@ -377,6 +420,7 @@ public class DriveMecanum {
         opMode.telemetry.addData("Current Z Int", String.valueOf(currentZint));
         opMode.telemetry.addData("Z Correction", String.valueOf(zCorrection));
         opMode.telemetry.addData("Range", String.valueOf(robot.rangeSensor.rawUltrasonic()));
+        opMode.telemetry.addData("RangeRight", String.valueOf(robot.rangeSensorRight.rawUltrasonic()));
         opMode.telemetry.addData("LF Encoder", String.valueOf(robot.motorLF.getCurrentPosition()));
         opMode.telemetry.addData("LR Encoder", String.valueOf(robot.motorLR.getCurrentPosition()));
         opMode.telemetry.addData("RF Encoder", String.valueOf(robot.motorRF.getCurrentPosition()));

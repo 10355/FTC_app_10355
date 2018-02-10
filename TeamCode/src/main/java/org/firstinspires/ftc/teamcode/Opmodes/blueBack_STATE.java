@@ -24,7 +24,7 @@
             - 1 for controlling balancing stone manipulation
         - Gyro sensor located at the center of the robot - utilized to compensate for drift
         - 2 x Color sensor (colorSensorLeft)- utilized to identify gem color
-        - 1 x Range Sensor - utilized to position distance from wall during autonomous mode
+        - 2 x Range Sensor - utilized to position distance from wall during autonomous mode
         - 1 x Motorola Camera - Utilized for decrypting the location of the glyph in autonomous mode
 
     State Order :
@@ -227,13 +227,13 @@ public class blueBack_STATE extends LinearOpMode {
                     telemetry.addData("VUMARK", String.valueOf(vuMarkValue));
                     telemetry.update();
 
-                    robot.servoRight.setPosition(.7);
+                    robot.servoRight.setPosition(.75);
                     telemetry.addData("VUMARK", String.valueOf(vuMarkValue));
                     telemetry.addData("SERVO position", robot.servoLeft.getPosition());
                     telemetry.update();
-                    sleep(1000);
+                    sleep(2000);
                     if (robot.colorSensorRight.blue() > robot.colorSensorRight.red()) {  //Blue is back
-                        drive.translateTime(.75, .2, 180);
+                        drive.translateTime(.9, .2, 180);
                     }
                     else if (robot.colorSensorRight.blue() < robot.colorSensorRight.red()) {
                         drive.translateTime(.8, .3, 0);
@@ -248,36 +248,15 @@ public class blueBack_STATE extends LinearOpMode {
                 case POSITIONING:
 
                     // drive forward and get close to the wall
-                    drive.translateRange(.4, 180, 40);
+                    drive.translateRangeRight(.4, 180, 35);
                     telemetry.addData("Action = ", "Drive forward off of balancing stone");
-                    telemetry.addData("Range", String.valueOf(robot.rangeSensor.cmUltrasonic()));
+                    telemetry.addData("Range", String.valueOf(robot.rangeSensorRight.cmUltrasonic()));
                     telemetry.update();
-
-                    // correct positioning with gyrosensor
-                    gyroValue = robot.mrGyro.getIntegratedZValue();
-                    telemetry.addData("Action = ", "Adjust position of the robot so that we are parallel to the wall");
-                    telemetry.addData("Gyro Value = ", gyroValue);
-                    telemetry.update();
-
-//                    sleep(3000);
-
-                    if (gyroValue>0){
-                        drive.pivotRight(.2, 0);
-                    }  else if (gyroValue<0){
-                        drive.pivotRight(.2, 0);
-                    }
-
-                    // strafe to the right first
-                    telemetry.addData("Action = ", "Strafe right");
-                    telemetry.update();
-                    drive.translateTime(1.5, 0.4, 90);
-//                    sleep(3000);
 
                     //  get closer to the wall
                     telemetry.addData("Action = ", "Drive forward");
                     telemetry.update();
-                    drive.translateRange(.2, 180, 18);
-//                    sleep(3000);
+                    drive.translateRangeRight(.2, 180, 18);
 
                     state = State.CHECK_VU;
                     break;
@@ -288,11 +267,9 @@ public class blueBack_STATE extends LinearOpMode {
 
                     if (vuMarkValue == "LEFT") {
                         state = State.LEFT;
-                    }
-                    if (vuMarkValue == "CENTER") {
+                    } else if (vuMarkValue == "CENTER") {
                         state = State.CENTER;
-                    }
-                    if (vuMarkValue == "RIGHT") {
+                    } else {
                         state = State.RIGHT;
                     }
                     break;
@@ -301,17 +278,17 @@ public class blueBack_STATE extends LinearOpMode {
                     telemetry.addData("VUMARK", String.valueOf(vuMarkValue));
                     telemetry.addData("Action = ", "Drive forward");
                     telemetry.update();
-                    drive.translateRange(.2, 180, 18);
+                    drive.translateRangeRight(.2, 180, 18);
 
                     telemetry.addData("Range", String.valueOf(robot.rangeSensor.cmUltrasonic()));
                     telemetry.addData("Action = ", "strafe right #1");
                     telemetry.update();
-                    drive.translateRange(.2, 270, 15);
+                    drive.translateRangeRight(.2, 270, 15);
 
                     telemetry.addData("Range", String.valueOf(robot.rangeSensor.cmUltrasonic()));
                     telemetry.addData("Action = ", "strafe right #2");
                     telemetry.update();
-                    drive.translateTime(1.85, .4, 270);
+                    drive.translateTime(.7, .4, 90);
 
                     telemetry.addData("Action = ", "Kick block");
                     telemetry.update();
@@ -338,17 +315,17 @@ public class blueBack_STATE extends LinearOpMode {
                     telemetry.addData("VUMARK", String.valueOf(vuMarkValue));
                     telemetry.addData("Action = ", "Drive forward");
                     telemetry.update();
-                    drive.translateRange(.2, 180, 18);
+                    drive.translateRangeRight(.2, 180, 18);
 
-                    telemetry.addData("Range", String.valueOf(robot.rangeSensor.cmUltrasonic()));
+                    telemetry.addData("Range", String.valueOf(robot.rangeSensorRight.cmUltrasonic()));
                     telemetry.addData("Action = ", "strafe right #1");
                     telemetry.update();
-                    drive.translateRange(.2, 270, 15);
+                    drive.translateRangeRight(.2, 270, 15);
 
-                    telemetry.addData("Range", String.valueOf(robot.rangeSensor.cmUltrasonic()));
+                    telemetry.addData("Range", String.valueOf(robot.rangeSensorRight.cmUltrasonic()));
                     telemetry.addData("Action = ", "strafe right for 2 seconds");
                     telemetry.update();
-                    drive.translateTime(3.1, .4, 270);
+                    drive.translateTime(1, .4, 270);
 
                     telemetry.addData("Action = ", "Kick block");
                     telemetry.update();
@@ -375,17 +352,17 @@ public class blueBack_STATE extends LinearOpMode {
                     telemetry.addData("VUMARK", String.valueOf(vuMarkValue));
                     telemetry.addData("Action = ", "Drive forward");
                     telemetry.update();
-                    drive.translateRange(.2, 180, 18);
+                    drive.translateRangeRight(.2, 180, 18);
 
                     telemetry.addData("Range", String.valueOf(robot.rangeSensor.cmUltrasonic()));
                     telemetry.addData("Action = ", "strafe right #1");
                     telemetry.update();
-                    drive.translateRange(.2, 270, 15);
+                    drive.translateRangeRight(.2, 270, 15);
 
                     telemetry.addData("Range", String.valueOf(robot.rangeSensor.cmUltrasonic()));
                     telemetry.addData("Action = ", "strafe right #2");
                     telemetry.update();
-                    drive.translateTime(4.3, .4, 270);
+                    drive.translateTime(2.1, .4, 270);
 
                     telemetry.addData("Action = ", "Kick block");
                     telemetry.update();
@@ -478,5 +455,4 @@ public class blueBack_STATE extends LinearOpMode {
     enum State {
         HALT, VUMark, LEFT, BALL, CHECK_VU, CENTER, RIGHT, TEST, POSITIONING
     }
-
 }

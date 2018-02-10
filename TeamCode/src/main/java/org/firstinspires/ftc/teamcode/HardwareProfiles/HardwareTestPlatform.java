@@ -53,6 +53,7 @@ public class HardwareTestPlatform {
 //    public TouchSensor limitDown;           //Declare the Lift down limit switch
     public BNO055IMU imu = null;
     public ModernRoboticsI2cRangeSensor rangeSensor;
+    public ModernRoboticsI2cRangeSensor rangeSensorRight;
 
     public DeviceInterfaceModule dim;                  // Device Object
     public DigitalChannel        limitUp;                // Device Object
@@ -101,6 +102,9 @@ public class HardwareTestPlatform {
             I2cAddr i2CAddressRangeLeft = I2cAddr.create8bit(0x28);
             rangeSensor = hwMap.get(ModernRoboticsI2cRangeSensor.class, "range");
             rangeSensor.setI2cAddress(i2CAddressRangeLeft);
+            I2cAddr i2CAddressRangeRight = I2cAddr.create8bit(0x2a);
+            rangeSensorRight = hwMap.get(ModernRoboticsI2cRangeSensor.class, "rangeRight");
+            rangeSensorRight.setI2cAddress(i2CAddressRangeRight);
 
             //Define the the limit switches for the glyph box
             limitUp= hwMap.get(DigitalChannel.class, "liftUp");

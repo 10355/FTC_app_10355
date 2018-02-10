@@ -248,7 +248,7 @@ public class blueFront_bonus extends LinearOpMode {
                     telemetry.addData("VUMARK", String.valueOf(vuMarkValue));
                     telemetry.addData("SERVO position", robot.servoLeft.getPosition());
                     telemetry.update();
-                    sleep(500);
+                    sleep(1000);
                     if (robot.colorSensorRight.blue() > robot.colorSensorRight.red()) {  //Blue is back
                         drive.translateTime(1.2, .2, 180);
                         robot.servoRight.setPosition(.1);

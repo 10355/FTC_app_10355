@@ -79,6 +79,7 @@ public class AutoSetupSensor extends LinearOpMode {
     public double colorLeftBlue = 0;
     public double currentZint = 0;
     public double rangeDistance = 0;
+    public double rangeRightDistance =0;
     public double currentLauncherPosition =0;
     public double currentGlyphArmPosition = 0;
 
@@ -116,6 +117,7 @@ public class AutoSetupSensor extends LinearOpMode {
             getSensorData();
 
             telemetry.addData("range = ", rangeDistance);
+            telemetry.addData("rangeRight = ", rangeRightDistance);
             telemetry.addData("gyro = ", currentZint);
             telemetry.addData("colorLeftRed = ", colorLeftRed);
             telemetry.addData("colorLeftBlue = ", colorLeftBlue);
@@ -141,6 +143,7 @@ public class AutoSetupSensor extends LinearOpMode {
         colorLeftBlue = robot.colorSensorLeft.blue();
         currentZint = robot.mrGyro.getIntegratedZValue();
         rangeDistance = robot.rangeSensor.cmUltrasonic();
+        rangeRightDistance = robot.rangeSensorRight.cmUltrasonic();
         currentLauncherPosition = robot.motorRelicArm.getCurrentPosition();
         currentGlyphArmPosition = robot.motorLift.getCurrentPosition();
 

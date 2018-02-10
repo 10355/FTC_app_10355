@@ -117,8 +117,8 @@ public class TeleOp_test extends LinearOpMode {
              *      -   Speed Backward          =    Gamepad1.right_bumper
              */
 
-            double speed = Math.hypot(gamepad1.left_stick_x, gamepad1.left_stick_y *-1);
-            double robotAngle = Math.atan2((gamepad1.left_stick_y*-1), (gamepad1.left_stick_x )) - Math.PI / 4;
+            double speed = Math.hypot(gamepad1.left_stick_x, gamepad1.left_stick_y * -1);
+            double robotAngle = Math.atan2((gamepad1.left_stick_y * -1), (gamepad1.left_stick_x)) - Math.PI / 4;
             double rightX = gamepad1.right_stick_x;
 
             telemetry.addData("Speed Value = ", speed);
@@ -127,8 +127,8 @@ public class TeleOp_test extends LinearOpMode {
 
             final double vlf = speed * Math.cos(robotAngle) + rightX;
             final double vrf = speed * Math.sin(robotAngle) - rightX;
-            final double vlr = (speed * Math.sin(robotAngle) + rightX)*.9;
-            final double vrr = (speed * Math.cos(robotAngle) - rightX)*.9;
+            final double vlr = (speed * Math.sin(robotAngle) + rightX) * .9;
+            final double vrr = (speed * Math.cos(robotAngle) - rightX) * .9;
 
             robot.motorLF.setPower(vlf);
             robot.motorRF.setPower(vrf);
@@ -138,7 +138,7 @@ public class TeleOp_test extends LinearOpMode {
             /**
              * Park the robot on the balancing stone
              */
-            if(gamepad1.x == true) {
+            if (gamepad1.x == true) {
                 robot.motorLF.setPower(.75);
                 robot.motorRF.setPower(.75);
                 robot.motorLR.setPower(.75);
@@ -151,24 +151,24 @@ public class TeleOp_test extends LinearOpMode {
 
             // control the balancing stone servo
 
-            if (gamepad1.right_trigger > 0){
+            if (gamepad1.right_trigger > 0) {
                 robot.servoStone.setPosition(.85);
             }
 
-            if (gamepad1.left_trigger > 0){
+            if (gamepad1.left_trigger > 0) {
                 robot.servoStone.setPosition(.79);
             }
 
-            if (gamepad1.left_bumper){      // if gamepad1.left_bumper
+            if (gamepad1.left_bumper) {      // if gamepad1.left_bumper
                 rangeDistance = robot.rangeSensor.cmUltrasonic();
-                while (rangeDistance > 40){         // while rangeDistance
+                while (rangeDistance > 40) {         // while rangeDistance
                     // lower arm into the correct position
 
                     // raise arm into position to place glyphs in loader
                     currentGlyphArmPosition = robot.motorLift.getCurrentPosition();
-                    if (currentGlyphArmPosition > MAXARMPOSITION){
+                    if (currentGlyphArmPosition > MAXARMPOSITION) {
                         robot.motorLift.setPower(.2);
-                    }else if (currentGlyphArmPosition > MINARMPOSITION){
+                    } else if (currentGlyphArmPosition > MINARMPOSITION) {
                         robot.motorLift.setPower(0);
                     }
 
@@ -190,11 +190,11 @@ public class TeleOp_test extends LinearOpMode {
                     // lower arm into the correct position
 
                     currentGlyphArmPosition = robot.motorLift.getCurrentPosition();
-                    if (currentGlyphArmPosition < MINARMPOSITION){
+                    if (currentGlyphArmPosition < MINARMPOSITION) {
                         robot.motorLift.setPower(.1);
-                    }else if (currentGlyphArmPosition > TARGETARMPOSITION){
+                    } else if (currentGlyphArmPosition > TARGETARMPOSITION) {
                         robot.motorLift.setPower(-.2);
-                        robot.servoLiftLeft.setPosition (0.25);
+                        robot.servoLiftLeft.setPosition(0.25);
                         robot.servoLiftRight.setPosition(0.75);
                     } else {
                         robot.motorLift.setPower(0);
@@ -220,10 +220,10 @@ public class TeleOp_test extends LinearOpMode {
              *      -   Glyph arm control   =   gamepad2.right_stick
              */
 
-            if (gamepad1.b || gamepad2.b) {           // if gamepad1.x
+            if (gamepad1.b || gamepad2.b || gamepad2.left_bumper) {           // if gamepad1.x
                 robot.servoBlockExit.setPosition(.5);
                 sleep(400);
-            } else{
+            } else {
                 robot.servoBlockExit.setPosition(.95);
             }           // if gamepad1.x
 
@@ -233,7 +233,7 @@ public class TeleOp_test extends LinearOpMode {
                 robot.servoLiftRight.setPosition(relicRightPosition);
                 robot.servoLiftLeft.setPosition(0);
                 sleep(200);
-            }  else if ((gamepad2.right_bumper) && (relicRightPosition > .8)) {
+            } else if ((gamepad2.right_bumper) && (relicRightPosition > .8)) {
                 relicRightPosition = 0.75;
                 robot.servoLiftRight.setPosition(relicRightPosition);
                 robot.servoLiftLeft.setPosition(.25);
@@ -245,9 +245,11 @@ public class TeleOp_test extends LinearOpMode {
 
             if ((gamepad2.a) && (robot.limitDown.getState() == true)) {
                 robot.motorLinearSlide.setPower(-.6);
-            } else if ((gamepad2.y) && (robot.limitUp.getState() == true)){            // if gamepad1.y
+            } else if ((gamepad2.y) && (robot.limitUp.getState() == true)) {            // if gamepad1.y
                 robot.motorLinearSlide.setPower(.6);
-            } else {
+            } else if ((gamepad2.y) && (robot.limitUp.getState() == false)){
+                robot.motorLinearSlide.setPower(.005);                          // keep the lift from backsliding
+            }else {
                 robot.motorLinearSlide.setPower(0);
             }                   // if gamepad2.y
 

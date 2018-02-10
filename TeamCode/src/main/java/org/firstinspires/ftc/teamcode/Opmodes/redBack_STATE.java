@@ -26,7 +26,7 @@ package org.firstinspires.ftc.teamcode.Opmodes;
             - 1 for controlling balancing stone manipulation
         - Gyro sensor located at the center of the robot - utilized to compensate for drift
         - 2 x Color sensor (colorSensorLeft)- utilized to identify gem color
-        - 1 x Range Sensor - utilized to position distance from wall during autonomous mode
+        - 2 x Range Sensors - utilized to position distance from wall during autonomous mode
         - 1 x Motorola Camera - Utilized for decrypting the location of the glyph in autonomous mode
 
     State Order:
@@ -218,7 +218,7 @@ public class redBack_STATE extends LinearOpMode {
                     telemetry.addData("VUMARK", String.valueOf(vuMarkValue));
                     telemetry.addData("SERVO position", robot.servoLeft.getPosition());
                     telemetry.update();
-                    sleep(1000);
+                    sleep(2000);
                     if (robot.colorSensorLeft.blue() > robot.colorSensorLeft.red()) {  //Blue is back
                         telemetry.addData("Ball Color = ", "blue");
                         telemetry.update();
@@ -245,32 +245,6 @@ public class redBack_STATE extends LinearOpMode {
                     telemetry.update();
 //                    sleep(3000);
 
-                    // correct positioning with gyrosensor
-                    gyroValue = robot.mrGyro.getIntegratedZValue();
-                    telemetry.addData("Action = ", "Adjust position of the robot so that we are parallel to the wall");
-                    telemetry.addData("Gyro Value = ", gyroValue);
-                    telemetry.update();
-
-
-                    if (gyroValue>0){
-                        drive.pivotRight(.2, 0);
-                    }  else if (gyroValue<0){
-                        drive.pivotRight(.2, 0);
-                    }
-//                    sleep(3000);
-
-                    // strafe to the right first
-                    telemetry.addData("Action = ", "Strafe right");
-                    telemetry.update();
-                    drive.translateTime(.5, 0.3, 270);
-//                    sleep(3000);
-
-                    if (gyroValue>0){
-                        drive.pivotRight(.2, 0);
-                    }  else if (gyroValue<0){
-                        drive.pivotRight(.2, 0);
-                    }
-
                     //  get closer to the wall
                     telemetry.addData("Action = ", "Drive forward");
                     telemetry.update();
@@ -286,11 +260,9 @@ public class redBack_STATE extends LinearOpMode {
 
                     if (vuMarkValue == "LEFT") {
                         state = State.LEFT;
-                    }
-                    if (vuMarkValue == "CENTER") {
+                    } else if (vuMarkValue == "CENTER") {
                         state = State.CENTER;
-                    }
-                    if (vuMarkValue == "RIGHT") {
+                    } else {
                         state = State.RIGHT;
                     }
                     break;
@@ -306,7 +278,7 @@ public class redBack_STATE extends LinearOpMode {
                     telemetry.addData("Action = ", "strafe right #2");
                     telemetry.update();
                     sleep(100);
-                    drive.translateTime(1, .2, -90);
+                    drive.translateTime(0.9, .2, -90);
 
                     telemetry.addData("Action = ", "Kick block");
                     telemetry.update();

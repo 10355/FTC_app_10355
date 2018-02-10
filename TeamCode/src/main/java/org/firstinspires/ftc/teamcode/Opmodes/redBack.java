@@ -65,7 +65,7 @@ import org.firstinspires.ftc.teamcode.Libs.DriveMecanum;
 /**
  * Name the opMode and put it in the appropriate group
  */
-@Autonomous(name = "Auto Red Back", group = "COMP")
+@Autonomous(name = "STATE - Auto Red Back", group = "COMP")
 @Disabled
 
 public class redBack extends LinearOpMode {
@@ -254,8 +254,7 @@ public class redBack extends LinearOpMode {
                     }
                     if (vuMarkValue == "CENTER") {
                         state = State.CENTER;
-                    }
-                    if (vuMarkValue == "RIGHT") {
+                    } else {
                         state = State.RIGHT;
                     }
                     break;
